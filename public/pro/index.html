@@ -1123,61 +1123,69 @@ async function reverseEngineer() {
 
   const base64Data = state.reImageData.split(',')[1];
 
-  const analysisPrompt = `You are an expert AI photo booth prompt engineer. Your job is to analyze this AI-generated photo booth image and write a prompt that, when given to an AI model with a new guest photo, will produce an output that looks EXACTLY like this image's style, technique, and aesthetic.
+  const analysisPrompt = `You are an expert AI photo booth prompt engineer. Your job is to analyze this AI-generated photo booth image and write a prompt that, when given to an AI model with a new guest photo, will produce an output that looks EXACTLY like this image.
 
 ${filterHint}
 
-CRITICAL CONTEXT: This prompt transforms a guest's INPUT PHOTO taken at a booth into an AI-generated image. The prompt must be so specific that the AI output is visually indistinguishable from the uploaded reference image in terms of art style, technique, color palette, background treatment, and rendering approach.
+CRITICAL CONTEXT: This prompt transforms a guest's INPUT PHOTO taken at a booth into an AI-generated image. The AI output must be visually indistinguishable from the uploaded reference in style, technique, composition, and framing.
+
+STEP 1 — VISUAL ANALYSIS (do this mentally before writing anything):
+Before you write a single word of the prompt, answer these questions about the uploaded image:
+- FRAMING: Is this a close-up/headshot, waist-up portrait, three-quarter, or FULL-LENGTH/full-body figure?
+- FACE: Are facial features fully rendered with detail (eyes, nose, lips visible), OR is the face blank/featureless/faceless like a fashion sketch?
+- PROPORTIONS: Are the body proportions realistic, or elongated like a fashion illustration?
+- FIGURE PLACEMENT: Where is the subject positioned — centered, left, right? How much of the frame do they fill?
+- COLOR PALETTE: List the EXACT colors you see. Is it mostly white? Mostly colorful? Muted? Bold?
+- BACKGROUND: What specifically is behind the subject? Plain white? Color washes? Drips? Geometric shapes? Scene?
+- LINE WORK: Are there visible ink/pencil outlines, or is it rendered without lines?
+- SPECIAL DETAILS: Drips, splatters, bokeh, texture, grain, etc.?
+
+STEP 2 — WRITE THE PROMPT incorporating your analysis:
 
 RULES:
-1. Write the ENTIRE prompt as a SINGLE continuous paragraph — no headers, no bullets, no line breaks
-2. Your prompt must be a TECHNICAL RECREATION GUIDE, not an artistic description. Describe HOW to render, not how it FEELS.
-3. Write 250+ words minimum
-4. Study the image closely: What exact art technique is used? What specific colors appear? How are faces rendered? How is hair rendered? What does the background look like? Are there drips, splatters, bleeds? How much white space? What's the composition?
+1. SINGLE continuous paragraph — no headers, no bullets, no line breaks
+2. TECHNICAL RECREATION GUIDE, not artistic description. Describe HOW to render, not how it FEELS.
+3. 250+ words minimum
+4. EVERY visual observation from Step 1 MUST appear in the prompt. If the figure is full-length, say full-length. If the face is blank/faceless, say faceless. If there are drips, describe the drips. Do NOT add details that aren't in the image.
 
-MANDATORY PROMPT STRUCTURE:
+PROMPT STRUCTURE:
 
 BLOCK 1 - SUBJECT PRESERVATION (always first):
+For stylized: "Preserve the precise number of subjects, their relative positions, body poses, head orientations, gaze directions, facial expressions, hairstyles, clothing details, and any accessories exactly as captured, without altering or idealizing any aspect."
 For photorealistic: "CRITICAL REQUIREMENT — DO NOT MODIFY APPEARANCE: The subject's EXACT facial features, bone structure, eye shape, eye color, nose shape, lip shape, skin tone, hair color, hair texture, hair style, and hair length MUST remain completely unchanged and 100% true to the original image."
-For stylized: "Preserve the precise number of subjects, their relative positions, body poses, head orientations, gaze directions, facial expressions, smiles, hairstyles, clothing details, and any accessories exactly as captured, without altering or idealizing any aspect."
 
-BLOCK 2 - TRANSFORMATION + DETAILED STYLE (this is the bulk — 200+ words):
-This block must be so specific that someone reading it could recreate this exact style without ever seeing the image. Include ALL of these:
+BLOCK 2 - COMPOSITION + FRAMING (CRITICAL — describe EXACTLY what you see):
+State the exact framing and composition. Examples:
+- "Render as a FULL-LENGTH full-body figure from head to feet, centered in the frame with significant white space around all edges"
+- "Render as a waist-up portrait filling most of the frame"
+- "Render as a close-up headshot with face filling the center"
+If the face in the image is BLANK/FEATURELESS (no eyes, nose, lips drawn — just a smooth face shape like a fashion croquis), you MUST state: "Render the face as a blank, featureless oval with no facial details — faceless fashion illustration style."
+If the face IS rendered with features, describe how (detailed watercolor eyes, minimal line work, etc.)
+State the body proportions: realistic, or elongated/exaggerated fashion illustration proportions?
 
-For watercolor/illustrated styles, specify:
-- Exact art technique: ink contours? watercolor washes? wet-on-wet? layered translucent washes? visible brush strokes?
-- Face rendering: how are eyes, smile, cheeks rendered? Rosy cheeks? Clean line work? Watercolor skin tones?
-- Hair rendering: flowing strokes? dark washes? highlights showing through?
-- Clothing rendering: watercolor washes for fabric? fold lines? how much detail?
-- Background: what colors exactly? (blush pink, warm peach, champagne, etc.) Watercolor blooms? Bleeds?
-- Special effects: drips? splatters? droplets? How many and where?
-- White space: how much of the image is white paper? Where does the illustration sit?
-- What it should NOT look like: digital rendering? photorealistic skin? sharp edges?
+BLOCK 3 - TRANSFORMATION + DETAILED STYLE (bulk of the prompt — 150+ words):
+For watercolor/illustrated styles, describe:
+- Exact technique: ink contour lines? watercolor washes? wet-on-wet? layered translucent washes?
+- Hair: flowing brush strokes? dark washes? flat color?
+- Clothing: how is fabric rendered? watercolor washes? detailed fold lines? what colors?
+- Background: name exact colors (champagne, blush, beige, etc.). Watercolor blooms? Rectangular wash blocks? Drips running downward? How much white space?
+- Effects: drips, splatters, droplets — describe quantity, size, placement
+- What to AVOID: If the style is minimalist, say "avoid heavy color saturation" etc.
 
-EXAMPLE of a GOOD watercolor prompt (for reference quality level):
-"Transform into a whimsical, full-length watercolor illustration utilizing loose, flowing watercolor techniques with layered translucent washes, visible brush strokes, and soft bleeding edges. Paint skin with warm, natural tones and subtle rosy cheeks, rendering faces with clean, minimal line work for expressive eyes and warm genuine smiles. Depict clothing with elegant watercolor washes that capture fabric texture and folds through soft color layering. Use a light, creamy background with gentle watercolor bleeds and washes. Surround with subtle watercolor botanical elements in muted greens and creams."
-
-For photorealistic styles, specify:
-- Scene/environment in detail
-- Wardrobe: "For female looks:" and "For male looks:" with specific fabrics, colors, accessories
-- Lighting: key light angle, rim light, fill percentages, color temperature
-- Background: gradient colors, bokeh, atmospheric effects
-- Skin rendering: pore detail, natural sheen, subsurface scattering
-- Camera specs: lens, f-stop, depth of field
-
-EXAMPLE of a GOOD photorealistic prompt (for reference quality level):
-"Editorial portrait photograph of a joyful person in celebratory moment, genuine bright smile. CRITICAL REQUIREMENT — DO NOT MODIFY APPEARANCE: [preservation block]. Subject wearing [detailed wardrobe]. Background is [detailed scene with specific elements, people, activity]. Moody atmospheric lighting with subtle washes of [colors], dim Edison bulbs casting amber light. Shot on medium format camera, shallow depth of field, warm color grading with rich jewel tones. Negative prompt: altered faces, altered hair, beauty filters, AI artifacts."
+For photorealistic styles, describe:
+- Scene/environment, wardrobe ("For female looks:" / "For male looks:" if gendered)
+- Lighting, camera specs, color grading, background detail
 
 ${clothingInstruction}
 
-BLOCK 3 - QUALITY CLOSER:
-End with resolution and quality statement. For photorealistic, include "Negative prompt:" section.
+BLOCK 4 - QUALITY CLOSER:
+End with quality/resolution. For photorealistic, add "Negative prompt:" section.
 
-YOUR OUTPUT must match the quality and specificity of these examples. Do NOT write vague descriptions like "elegant aesthetic" or "sophisticated feel." Write TECHNICAL INSTRUCTIONS that tell the AI exactly what to render.
+CRITICAL ACCURACY RULE: Your prompt must match the uploaded image so precisely that if someone read only your prompt, they could describe the image back to you accurately — including whether the subject is full-length or close-up, whether the face has features or is blank, what colors the background is, and where the drips/effects are. If your prompt could describe multiple different images, it's not specific enough.
 
-NOW: Analyze the uploaded image and write the complete prompt. Output ONLY the prompt paragraph — no intro, no explanation.
+NOW: Analyze the uploaded image and write the complete prompt. Output ONLY the prompt paragraph.
 
-After the prompt, on a NEW LINE, write exactly this format:
+After the prompt, on a NEW LINE, write exactly:
 ---SETTINGS---
 FILTER: [recommend the best Snappic filter: BananaFX Real, BananaFX Styled, BananaFX Pro Real, PersonaFX Real, PersonaFX Styled, PersonaFX Pro Real, ClassicFX Group Real, ClassicFX Group Styled]
 STYLE: [photorealistic, stylized, caricature, 3d, anime, watercolor, or other]
