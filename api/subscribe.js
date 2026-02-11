@@ -13,45 +13,60 @@ export default async function handler(req, res) {
   const API_KEY = process.env.MAILCHIMP_API_KEY;
   const LIST_ID = process.env.MAILCHIMP_LIST_ID;
 
-  // If Mailchimp is configured, subscribe them
   if (API_KEY && LIST_ID) {
     try {
-      const DC = API_KEY.split('-').pop(); // e.g. "us21"
+      const DC = API_KEY.split('-').pop();
+      const authString = Buffer.from('anystring:' + API_KEY).toString('base64');
+
+      // Step 1: Add/update the member
       const response = await fetch(
         `https://${DC}.api.mailchimp.com/3.0/lists/${LIST_ID}/members`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Basic ${btoa('anystring:' + API_KEY)}`
+            'Authorization': 'Basic ' + authString
           },
           body: JSON.stringify({
             email_address: email,
             status: 'subscribed',
-            merge_fields: { FNAME: name || '' },
-            tags: ['prompt-engine']
+            merge_fields: { FNAME: name || '' }
           })
         }
       );
 
       const data = await response.json();
-      
-      // Already subscribed is fine
-      if (response.ok || data.title === 'Member Exists') {
-        return res.status(200).json({ success: true });
-      }
-      
-      console.error('Mailchimp error:', data);
-      // Still let them through even if Mailchimp fails
-      return res.status(200).json({ success: true, warning: 'Email noted' });
+      console.log('Mailchimp add response:', response.status, JSON.stringify(data));
+
+      // Step 2: Add tag (separate API call — Mailchimp requires this)
+      const emailHash = await md5(email.toLowerCase().trim());
+      await fetch(
+        `https://${DC}.api.mailchimp.com/3.0/lists/${LIST_ID}/members/${emailHash}/tags`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Basic ' + authString
+          },
+          body: JSON.stringify({
+            tags: [{ name: 'prompt-engine', status: 'active' }]
+          })
+        }
+      );
+
+      return res.status(200).json({ success: true });
     } catch (err) {
-      console.error('Mailchimp error:', err);
+      console.error('Mailchimp error:', err.message || err);
       return res.status(200).json({ success: true, warning: 'Email noted' });
     }
   }
 
-  // No Mailchimp configured - still let them through
-  // Emails will be logged in Vercel's runtime logs
   console.log('EMAIL_SIGNUP:', email, name || '');
-  return res.status(200).json({ success: true, warning: 'No email service configured - check Vercel logs' });
+  return res.status(200).json({ success: true, warning: 'No email service configured' });
+}
+
+// Simple MD5 hash for Mailchimp subscriber hash
+async function md5(str) {
+  const { createHash } = await import('crypto');
+  return createHash('md5').update(str).digest('hex');
 }
