@@ -1,0 +1,9 @@
+{
+  "name": "ai-booth-prompt-engine",
+  "version": "1.0.0",
+  "description": "AI Photo Booth Prompt Engine by Captured Celebrations",
+  "scripts": {
+    "start": "npx serve public",
+    "build": "echo 'Static site - no build needed'"
+  }
+}
