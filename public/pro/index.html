@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Photo Booth Prompt Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #D4738C;
+  --gold-light: #B85570;
+  --dark: #FDF9F9;
+  --dark-card: #FFFFFF;
+  --dark-input: #FBF5F6;
+  --dark-border: #F0DEE2;
+  --text: #3D2B30;
+  --text-muted: #9C7882;
+  --accent: #C4607A;
+  --success: #6DAE72;
+  --warn: #D4956A;
+  --info: #7BA3C9;
+  --glow: rgba(212, 115, 140, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--dark);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(ellipse at 30% 20%, rgba(212,115,140,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 80%, rgba(212,115,140,0.04) 0%, transparent 50%);
+  pointer-events: none; z-index: 0;
+}
+
+.container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 40px 24px 60px;
+  position: relative; z-index: 1;
+}
+
+.header { text-align: center; margin-bottom: 32px; }
+.header .brand {
+  font-family: 'Playfair Display', serif;
+  font-size: 11px; letter-spacing: 4px;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 8px;
+}
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 700;
+  color: var(--text); line-height: 1.2; margin-bottom: 8px;
+}
+.header h1 span { color: var(--gold); }
+.header .subtitle { font-size: 14px; color: var(--text-muted); font-weight: 300; }
+
+/* Mode tabs */
+.mode-tabs { display: flex; justify-content: center; gap: 4px; margin-bottom: 36px; background: var(--dark-input); border-radius: 12px; padding: 4px; max-width: 400px; margin-left: auto; margin-right: auto; }
+.mode-tab {
+  flex: 1; padding: 10px 16px; border: none; border-radius: 10px;
+  background: transparent; color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.25s ease;
+}
+.mode-tab.active { background: var(--dark-card); color: var(--gold); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.mode-tab:hover:not(.active) { color: var(--text); }
+
+/* Steps */
+.steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 40px; }
+.step-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--dark-border); transition: all 0.4s ease;
+}
+.step-dot.active { background: var(--gold); box-shadow: 0 0 12px rgba(212,115,140,0.4); }
+.step-dot.completed { background: var(--success); }
+
+/* Cards */
+.card {
+  background: var(--dark-card);
+  border: 1px solid var(--dark-border);
+  border-radius: 16px; padding: 32px;
+  margin-bottom: 24px; transition: border-color 0.3s ease;
+  animation: fadeIn 0.5s ease forwards;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+}
+.card:hover { border-color: rgba(212,115,140,0.35); }
+.card-label {
+  font-size: 10px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 16px; font-weight: 600;
+}
+.card h3 { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 6px; }
+.card p.desc { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+
+/* Recommendation banner */
+.rec-banner {
+  background: rgba(212,115,140,0.06);
+  border: 1px solid rgba(212,115,140,0.25);
+  border-radius: 10px; padding: 14px 18px;
+  margin-top: 16px; display: none;
+  font-size: 13px; line-height: 1.6;
+}
+.rec-banner .rec-label {
+  font-size: 10px; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--gold);
+  margin-bottom: 6px; font-weight: 600;
+}
+.rec-banner .rec-text { color: var(--text-muted); }
+.rec-banner .rec-text strong { color: var(--gold); }
+
+/* Selection Grid */
+.selection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.sel-btn {
+  background: var(--dark-input);
+  border: 1.5px solid var(--dark-border);
+  border-radius: 10px; padding: 14px 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 13px;
+  cursor: pointer; text-align: center;
+  transition: all 0.25s ease; line-height: 1.3;
+}
+.sel-btn:hover { border-color: var(--gold); background: rgba(212,115,140,0.06); }
+.sel-btn.selected {
+  border-color: var(--gold);
+  background: rgba(212,115,140,0.1);
+  color: var(--gold);
+  box-shadow: 0 0 16px rgba(212,115,140,0.1);
+}
+.sel-btn .emoji { display: block; font-size: 22px; margin-bottom: 6px; }
+.sel-btn .label { font-weight: 500; font-size: 12px; }
+.sel-btn .sublabel { font-size: 10px; color: var(--text-muted); margin-top: 3px; display: block; }
+
+/* Textarea */
+textarea {
+  width: 100%; min-height: 100px;
+  background: var(--dark-input);
+  border: 1.5px solid var(--dark-border);
+  border-radius: 10px; padding: 16px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  resize: vertical; outline: none;
+  transition: border-color 0.3s ease;
+}
+textarea:focus { border-color: var(--gold); }
+textarea::placeholder { color: var(--text-muted); }
+
+/* Toggles */
+.toggle-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.toggle-chip {
+  background: var(--dark-input);
+  border: 1px solid var(--dark-border);
+  border-radius: 20px; padding: 8px 16px;
+  color: var(--text-muted);
+  font-family: 'DM Sans', sans-serif; font-size: 12px;
+  cursor: pointer; transition: all 0.25s ease;
+}
+.toggle-chip:hover { border-color: var(--gold); }
+.toggle-chip.active {
+  background: rgba(212,115,140,0.12);
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* Generate button */
+.generate-btn {
+  display: block; width: 100%; margin-top: 28px;
+  background: linear-gradient(135deg, var(--gold), var(--accent));
+  border: none; border-radius: 12px;
+  padding: 16px; color: #FFFFFF;
+  font-family: 'DM Sans', sans-serif; font-size: 15px;
+  font-weight: 600; cursor: pointer;
+  transition: all 0.3s ease; letter-spacing: 0.5px;
+}
+.generate-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(212,115,140,0.3);
+}
+
+/* Output */
+.output-card {
+  display: none;
+  background: var(--dark-card);
+  border: 1px solid var(--gold);
+  border-radius: 16px; padding: 32px;
+  margin-top: 32px;
+}
+.output-card.visible { display: block; animation: fadeIn 0.5s ease forwards; }
+.output-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+.output-header h3 { font-family: 'Playfair Display', serif; font-size: 20px; }
+.copy-btn {
+  background: transparent; border: 1px solid var(--gold);
+  border-radius: 8px; padding: 8px 16px;
+  color: var(--gold); font-family: 'DM Sans', sans-serif;
+  font-size: 12px; cursor: pointer; transition: all 0.3s ease;
+}
+.copy-btn:hover { background: rgba(212,115,140,0.1); }
+.copy-btn.copied { background: var(--success); color: white; border-color: var(--success); }
+
+.output-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.meta-tag {
+  background: rgba(212,115,140,0.1);
+  border: 1px solid rgba(212,115,140,0.25);
+  border-radius: 6px; padding: 4px 10px;
+  font-size: 11px; color: var(--gold);
+}
+.prompt-output {
+  background: var(--dark-input);
+  border: 1px solid var(--dark-border);
+  border-radius: 10px; padding: 20px;
+  font-size: 14px; line-height: 1.7;
+  color: var(--text); white-space: pre-wrap;
+  margin-bottom: 16px;
+}
+
+/* Negative prompt */
+.neg-section {
+  background: rgba(123,163,201,0.06);
+  border: 1px solid rgba(123,163,201,0.2);
+  border-radius: 10px; padding: 16px;
+  margin-bottom: 16px;
+}
+.neg-section h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px; color: var(--info); margin-bottom: 8px;
+}
+.neg-section p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+.neg-copy-btn {
+  background: transparent; border: 1px solid var(--info);
+  border-radius: 6px; padding: 5px 12px;
+  color: var(--info); font-family: 'DM Sans', sans-serif;
+  font-size: 11px; cursor: pointer; margin-top: 8px;
+  transition: all 0.3s ease; display: inline-block;
+}
+.neg-copy-btn:hover { background: rgba(123,163,201,0.1); }
+
+/* Tips */
+.tips h4 { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--gold); margin-bottom: 8px; }
+.tips .setup-checklist {
+  margin-top: 10px; font-size: 12px; color: var(--text-muted); line-height: 1.8;
+}
+
+/* Reverse engineer section */
+.re-section { display: none; }
+.re-section.visible { display: block; }
+.re-upload-zone {
+  border: 2px dashed var(--dark-border); border-radius: 12px;
+  padding: 40px; text-align: center; cursor: pointer;
+  transition: all 0.3s ease; background: var(--dark-input);
+}
+.re-upload-zone:hover { border-color: var(--gold); background: rgba(212,115,140,0.04); }
+.re-upload-zone .icon { font-size: 36px; margin-bottom: 12px; }
+.re-upload-zone p { font-size: 13px; color: var(--text-muted); }
+.re-upload-zone p strong { color: var(--gold); }
+.re-preview { max-width: 300px; border-radius: 10px; margin: 16px auto; display: none; }
+.re-analyzing {
+  text-align: center; padding: 30px; display: none;
+  font-size: 14px; color: var(--text-muted);
+}
+.re-analyzing .spinner {
+  width: 32px; height: 32px; border: 3px solid var(--dark-border);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Builder section */
+.builder-section { display: block; }
+.builder-section.hidden { display: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  .container { padding: 24px 16px 40px; }
+  .header h1 { font-size: 28px; }
+  .card { padding: 24px; }
+  .selection-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="brand">Captured Celebrations</div>
+    <h1>AI Booth <span>Prompt Engine</span></h1>
+    <p class="subtitle">Generate copy-paste-ready AI prompts for your photo booth AI filters</p>
+  </div>
+
+  <!-- Mode Tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" onclick="switchMode('build')">✦ Build a Prompt</button>
+    <button class="mode-tab" onclick="switchMode('reverse')">🔍 Reverse Engineer</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- REVERSE ENGINEER MODE -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="re-section" id="reverseSection">
+    <div class="card">
+      <div class="card-label">Reverse Engineer</div>
+      <h3>Upload an AI Photo to Get Its Prompt</h3>
+      <p class="desc">Upload an AI-generated photo booth image and I'll analyze the style, lighting, rendering technique, and write a prompt that recreates the look.</p>
+
+      <div class="re-upload-zone" id="reUploadZone" onclick="document.getElementById('reFileInput').click()">
+        <div class="icon">📸</div>
+        <p>Click to upload or drag & drop<br><strong>JPG, PNG, or WebP</strong></p>
+      </div>
+      <input type="file" id="reFileInput" accept="image/*" style="display:none" onchange="handleREUpload(event)">
+      <img id="rePreview" class="re-preview">
+
+      <div style="margin-top: 16px;">
+        <div class="card-label" style="margin-bottom: 10px;">What filter was used? (if you know)</div>
+        <div class="toggle-row" id="reFilterRow">
+          <button class="toggle-chip active" onclick="selectREFilter(this)" data-val="unknown">Not sure</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXStyled">Stylized Single</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXReal">Realistic Group</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="personaFXStyled">Stylized Group</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="personaFXReal">Realistic Single</button>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <div class="card-label" style="margin-bottom: 10px;">Clothing in the prompt?</div>
+        <div class="toggle-row" id="reClothingRow">
+          <button class="toggle-chip active" onclick="selectREClothing(this)" data-val="neutral">Anyone can use it (gender-neutral)</button>
+          <button class="toggle-chip" onclick="selectREClothing(this)" data-val="gendered">Add "For female / For male" options</button>
+          <button class="toggle-chip" onclick="selectREClothing(this)" data-val="exact">Match this exact outfit</button>
+        </div>
+      </div>
+
+      <button class="generate-btn" style="margin-top: 20px" onclick="reverseEngineer()">🔍 Analyze & Generate Prompt</button>
+
+      <div class="re-analyzing" id="reAnalyzing">
+        <div class="spinner"></div>
+        <p>Analyzing style, lighting, rendering technique... (may take 10-15 seconds)</p>
+      </div>
+    </div>
+
+    <div class="output-card" id="reOutputCard">
+      <div class="output-header">
+        <h3 id="rePromptTitle">Reverse Engineered Prompt</h3>
+        <button class="copy-btn" id="reCopyBtn" onclick="copyREPrompt()">Copy Prompt</button>
+      </div>
+      <div class="output-meta" id="reOutputMeta"></div>
+      <div class="prompt-output" id="rePromptOutput"></div>
+      <div class="tips">
+        <h4>Booth Setup Checklist</h4>
+        <div class="setup-checklist" id="reTips"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- BUILD MODE -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="builder-section" id="builderSection">
+
+  <div class="steps">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <div class="step-dot" id="dot4"></div>
+  </div>
+
+  <!-- STEP 1: Event Info (auto-selects filter) -->
+  <div class="card">
+    <div class="card-label">Step 1</div>
+    <h3>Tell Me About Your Event</h3>
+    <p class="desc">I'll automatically pick the best AI filter for your booth.</p>
+
+    <div style="margin-bottom: 18px;">
+      <div class="card-label" style="margin-bottom: 10px;">How many people per photo?</div>
+      <div class="toggle-row" id="peopleRow">
+        <button class="toggle-chip" onclick="selectPeople(this)" data-val="1">1 person</button>
+        <button class="toggle-chip" onclick="selectPeople(this)" data-val="2-3">2–3 people</button>
+        <button class="toggle-chip" onclick="selectPeople(this)" data-val="4+">4+ people</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 18px;">
+      <div class="card-label" style="margin-bottom: 10px;">What look do you want?</div>
+      <div class="toggle-row" id="lookRow">
+        <button class="toggle-chip" onclick="selectLook(this)" data-val="photorealistic">Photorealistic</button>
+        <button class="toggle-chip" onclick="selectLook(this)" data-val="stylized">Stylized / Artistic</button>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 0;">
+      <div class="card-label" style="margin-bottom: 10px;">Need to include a logo or reference image?</div>
+      <div class="toggle-row" id="refRow">
+        <button class="toggle-chip" onclick="selectRef(this)" data-val="no">No</button>
+        <button class="toggle-chip" onclick="selectRef(this)" data-val="yes">Yes — Logo / Reference</button>
+      </div>
+    </div>
+
+    <div class="rec-banner" id="recBanner">
+      <div class="rec-label">✦ Auto-Selected Filter</div>
+      <div class="rec-text" id="recText"></div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Theme Category -->
+  <div class="card">
+    <div class="card-label">Step 2</div>
+    <h3>Theme Category</h3>
+    <p class="desc">What kind of event or theme are you building this for?</p>
+    <div class="selection-grid" id="themeGrid">
+      <button class="sel-btn" data-value="wedding" onclick="selectTheme(this)">
+        <span class="emoji">💍</span><span class="label">Wedding</span>
+      </button>
+      <button class="sel-btn" data-value="corporate" onclick="selectTheme(this)">
+        <span class="emoji">🏢</span><span class="label">Corporate</span>
+      </button>
+      <button class="sel-btn" data-value="quinceanera" onclick="selectTheme(this)">
+        <span class="emoji">👑</span><span class="label">Quinceañera</span>
+      </button>
+      <button class="sel-btn" data-value="birthday" onclick="selectTheme(this)">
+        <span class="emoji">🎂</span><span class="label">Birthday</span>
+      </button>
+      <button class="sel-btn" data-value="holiday" onclick="selectTheme(this)">
+        <span class="emoji">🎄</span><span class="label">Holiday Party</span>
+      </button>
+      <button class="sel-btn" data-value="cultural" onclick="selectTheme(this)">
+        <span class="emoji">🌺</span><span class="label">Cultural Event</span>
+      </button>
+      <button class="sel-btn" data-value="fashion" onclick="selectTheme(this)">
+        <span class="emoji">👗</span><span class="label">Fashion / Editorial</span>
+      </button>
+      <button class="sel-btn" data-value="sports" onclick="selectTheme(this)">
+        <span class="emoji">⚽</span><span class="label">Sports / Action</span>
+      </button>
+      <button class="sel-btn" data-value="custom" onclick="selectTheme(this)">
+        <span class="emoji">🎯</span><span class="label">Custom / Other</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Style Direction -->
+  <div class="card">
+    <div class="card-label">Step 3</div>
+    <h3>Style Direction</h3>
+    <p class="desc">Choose a visual style — or pick "Custom" and describe your own below.</p>
+    <div class="selection-grid" id="styleGrid">
+      <button class="sel-btn" data-value="cinematic" onclick="selectStyle(this)">
+        <span class="emoji">🎬</span><span class="label">Cinematic Editorial</span>
+      </button>
+      <button class="sel-btn" data-value="watercolor" onclick="selectStyle(this)">
+        <span class="emoji">🖌️</span><span class="label">Watercolor</span>
+      </button>
+      <button class="sel-btn" data-value="caricature" onclick="selectStyle(this)">
+        <span class="emoji">🎨</span><span class="label">Caricature</span>
+      </button>
+      <button class="sel-btn" data-value="luxury" onclick="selectStyle(this)">
+        <span class="emoji">💎</span><span class="label">Luxury / Glamour</span>
+      </button>
+      <button class="sel-btn" data-value="fantasy" onclick="selectStyle(this)">
+        <span class="emoji">🏰</span><span class="label">Fantasy / Fairytale</span>
+      </button>
+      <button class="sel-btn" data-value="retro" onclick="selectStyle(this)">
+        <span class="emoji">📻</span><span class="label">Retro / Vintage</span>
+      </button>
+      <button class="sel-btn" data-value="pixar" onclick="selectStyle(this)">
+        <span class="emoji">🧸</span><span class="label">Pixar / 3D Stylized</span>
+      </button>
+      <button class="sel-btn" data-value="bw" onclick="selectStyle(this)">
+        <span class="emoji">🖤</span><span class="label">Black & White</span>
+      </button>
+      <button class="sel-btn" data-value="anime" onclick="selectStyle(this)">
+        <span class="emoji">⚡</span><span class="label">Anime / Comic</span>
+      </button>
+      <button class="sel-btn" data-value="collectible" onclick="selectStyle(this)">
+        <span class="emoji">📦</span><span class="label">Collectible / Box</span>
+      </button>
+      <button class="sel-btn" data-value="customStyle" onclick="selectStyle(this)">
+        <span class="emoji">✏️</span><span class="label">Custom Style</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Description + Modifiers -->
+  <div class="card">
+    <div class="card-label">Step 4</div>
+    <h3>Describe Your Vision</h3>
+    <p class="desc">Add extra details or leave blank for the default style. The more specific, the better.</p>
+    <textarea id="vibeInput" placeholder="Example: Valentine's theme with red and pink rim lighting, couple nose-to-nose embrace, nightclub smoke haze, heart-shaped bokeh in background...&#10;&#10;Or: Tropical luau with tiki torches, sunset sky gradient, lei around neck, warm golden-hour backlight...&#10;&#10;Or: 80s prom with neon lights, big hair, retro sparkle, pastel tuxedos..."></textarea>
+
+    <div style="margin-top: 20px;">
+      <div class="card-label">Modifiers</div>
+      <p class="desc" style="margin-bottom: 10px;">Toggle on any that apply:</p>
+      <div class="toggle-row">
+        <button class="toggle-chip" onclick="toggleChip(this)" data-mod="gender">Gendered wardrobe</button>
+        <button class="toggle-chip" onclick="toggleChip(this)" data-mod="survey">Survey field [Name]</button>
+        <button class="toggle-chip" onclick="toggleChip(this)" data-mod="camera">Camera/lens specs</button>
+        <button class="toggle-chip" onclick="toggleChip(this)" data-mod="bobblehead">Bobblehead</button>
+        <button class="toggle-chip" onclick="toggleChip(this)" data-mod="logo">Logo in scene</button>
+        <button class="toggle-chip" onclick="toggleChip(this)" data-mod="negprompt">Negative prompt</button>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px; display: flex; gap: 20px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 160px;">
+        <div class="card-label" style="margin-bottom: 10px;">Pose</div>
+        <div class="toggle-row" id="poseRow">
+          <button class="toggle-chip active" onclick="selectPose(this)" data-pose="random">Random (Recommended)</button>
+          <button class="toggle-chip" onclick="selectPose(this)" data-pose="original">Keep Original</button>
+        </div>
+      </div>
+      <div style="flex: 1; min-width: 160px;">
+        <div class="card-label" style="margin-bottom: 10px;">Aspect Ratio</div>
+        <div class="toggle-row">
+          <button class="toggle-chip active" onclick="selectRatio(this)" data-ratio="Square (1024×1024)">Square</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="Portrait (1024×1536)">Portrait</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="Landscape (1536×1024)">Landscape</button>
+        </div>
+      </div>
+    </div>
+
+    <button class="generate-btn" onclick="generatePrompt()">✦ Generate Prompt</button>
+  </div>
+
+  <!-- Output -->
+  <div class="output-card" id="outputCard">
+    <div class="output-header">
+      <h3 id="promptTitle">Your Prompt</h3>
+      <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy Prompt</button>
+    </div>
+    <div class="output-meta" id="outputMeta"></div>
+    <div class="prompt-output" id="promptOutput"></div>
+
+    <div class="neg-section" id="negSection" style="display:none">
+      <h4>Negative Prompt</h4>
+      <p id="negOutput"></p>
+      <button class="neg-copy-btn" onclick="copyNeg()">Copy Negative Prompt</button>
+    </div>
+
+    <div class="tips">
+      <h4>Setup Checklist</h4>
+      <div class="setup-checklist" id="tipsContent"></div>
+    </div>
+  </div>
+
+  </div><!-- end builder section -->
+
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const state = {
+  filter: '', theme: '', style: '',
+  modifiers: new Set(), pose: 'random',
+  ratio: 'Square (1024×1024)',
+  people: '', look: '', refImage: '',
+  reFilter: 'unknown', reImageData: null, reClothing: 'neutral'
+};
+
+// ═══════════════════════════════════════
+// MODE SWITCHING
+// ═══════════════════════════════════════
+function switchMode(mode) {
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('builderSection').classList.toggle('hidden', mode === 'reverse');
+  document.getElementById('reverseSection').classList.toggle('visible', mode === 'reverse');
+}
+
+// ═══════════════════════════════════════
+// STEP 1: AUTO FILTER SELECTION
+// ═══════════════════════════════════════
+function selectPeople(btn) {
+  document.querySelectorAll('#peopleRow .toggle-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.people = btn.dataset.val;
+  autoSelectFilter();
+}
+
+function selectLook(btn) {
+  document.querySelectorAll('#lookRow .toggle-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.look = btn.dataset.val;
+  autoSelectFilter();
+}
+
+function selectRef(btn) {
+  document.querySelectorAll('#refRow .toggle-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.refImage = btn.dataset.val;
+  autoSelectFilter();
+}
+
+function autoSelectFilter() {
+  const { people, look, refImage } = state;
+  if (!people || !look) return;
+
+  const banner = document.getElementById('recBanner');
+  const text = document.getElementById('recText');
+  let filter = '';
+  let why = '';
+
+  if (look === 'photorealistic') {
+    if (refImage === 'yes') {
+      if (people === '1') {
+        filter = 'personaFXProReal';
+        why = 'Single person + photorealistic + reference image. Best prompt adherence and branding control.';
+      } else {
+        filter = 'bananaFXPro';
+        why = 'Groups + photorealistic + reference image. Best quality for group shots with branding.';
+      }
+    } else {
+      if (people === '1') {
+        filter = 'personaFXReal';
+        why = 'Single person photorealistic with excellent text handling and prompt adherence. 4 credits/test.';
+      } else {
+        filter = 'bananaFXReal';
+        why = 'Best filter for realistic group photos. Fast rendering keeps your booth line moving.';
+      }
+    }
+  } else {
+    if (refImage === 'yes') {
+      filter = 'personaFXProReal';
+      why = 'Reference image + stylized prompt gives you the most creative control. 5 credits/test.';
+    } else {
+      if (people === '1') {
+        filter = 'bananaFXStyled';
+        why = 'Best for single-person stylized looks. Fast rendering, strong artistic output.';
+      } else {
+        filter = 'personaFXStyled';
+        why = 'Best stylized filter for groups up to 3. Better prompt adherence for groups. 4 credits/test.';
+      }
+    }
+  }
+
+  const filterNames = {
+    bananaFXReal: 'Realistic Group', bananaFXStyled: 'Stylized Single',
+    bananaFXPro: 'Pro Realistic Group', personaFXReal: 'Realistic Single',
+    personaFXProReal: 'Pro Realistic Single', personaFXStyled: 'Stylized Group'
+  };
+
+  state.filter = filter;
+  text.innerHTML = `<strong>${filterNames[filter]}</strong> — ${why}`;
+  banner.style.display = 'block';
+  updateSteps();
+}
+
+// ═══════════════════════════════════════
+// SELECTORS
+// ═══════════════════════════════════════
+function selectTheme(btn) {
+  document.querySelectorAll('#themeGrid .sel-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.theme = btn.dataset.value;
+  updateSteps();
+}
+
+function selectStyle(btn) {
+  document.querySelectorAll('#styleGrid .sel-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.style = btn.dataset.value;
+  updateSteps();
+}
+
+function toggleChip(btn) {
+  btn.classList.toggle('active');
+  const mod = btn.dataset.mod;
+  if (state.modifiers.has(mod)) state.modifiers.delete(mod);
+  else state.modifiers.add(mod);
+}
+
+function selectPose(btn) {
+  document.querySelectorAll('#poseRow .toggle-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.pose = btn.dataset.pose;
+}
+
+function selectRatio(btn) {
+  document.querySelectorAll('[data-ratio]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.ratio = btn.dataset.ratio;
+}
+
+function updateSteps() {
+  const checks = [state.filter, state.theme, state.style];
+  for (let i = 0; i < 4; i++) {
+    const el = document.getElementById('dot' + (i + 1));
+    if (!el) continue;
+    el.classList.remove('active', 'completed');
+    if (i < checks.length && checks[i]) el.classList.add('completed');
+    else if (i === checks.filter(Boolean).length) el.classList.add('active');
+  }
+}
+
+// ═══════════════════════════════════════
+// PROMPT ENGINE v4
+// ═══════════════════════════════════════
+function generatePrompt() {
+  const vibe = document.getElementById('vibeInput').value.trim();
+  const { filter, theme, style, modifiers, pose, ratio } = state;
+
+  if (!filter) { alert('Please answer the event questions in Step 1 so I can pick the right filter'); return; }
+  if (!theme) { alert('Please select a theme category (Step 2)'); return; }
+  if (!style) { alert('Please select a style direction (Step 3)'); return; }
+
+  let prompt = '';
+  const isReal = ['bananaFXReal','bananaFXPro','personaFXReal','personaFXProReal'].includes(filter);
+  const isStyled = ['bananaFXStyled','personaFXStyled','bananaFXAnimated'].includes(filter);
+  const isBanana = filter.startsWith('banana');
+  const isPersona = filter.startsWith('persona');
+  const isGroup = state.people === '2-3' || state.people === '4+';
+
+  const hasGender = modifiers.has('gender');
+  const hasSurvey = modifiers.has('survey');
+  const hasCamera = modifiers.has('camera');
+  const hasBobble = modifiers.has('bobblehead');
+  const hasLogo = modifiers.has('logo');
+  const hasNeg = modifiers.has('negprompt');
+
+  // ── BLOCK 1: SUBJECT PRESERVATION ──
+  if (style === 'caricature') {
+    prompt += 'Turn this photo into a charming, highly detailed, fully colored hand-drawn caricature illustration. This is a complete artistic transformation — not a photo filter or effect. Every element including the subject\'s face, skin, eyes, lips, hair, clothing, and body must be fully redrawn in a playful, expressive caricature sketch style. ';
+  } else if (isReal) {
+    if (isGroup) {
+      prompt += 'Preserve the precise number of subjects, their relative positions, body poses, head orientations, gaze directions, facial expressions, smiles, hairstyles, clothing details, and any accessories exactly as captured, without altering or idealizing any aspect. ';
+    } else {
+      prompt += 'Preserve the exact facial features, bone structure, skin tone, hairstyle, gaze direction, and facial expression of the subject with absolutely no alterations. ';
+    }
+  } else if (isStyled) {
+    if (isGroup) {
+      prompt += 'Accurately replicate only the exact people present in the input photo. Do not add, remove, or invent any additional figures, bouquets, accessories, or elements not clearly visible in the reference image. Preserve the exact number of subjects, their relative positions, body poses, arm placements, head orientations, gaze directions, facial expressions, smiles, hairstyles, and clothing details precisely as captured, without altering, idealizing, exaggerating, or changing any aspect of posture, expression, or interaction. ';
+    } else {
+      prompt += 'Preserve the subject\'s likeness, facial features, hairstyle, and expression as faithfully as the stylized rendering allows, maintaining recognizable identity and emotional warmth throughout the transformation. ';
+    }
+  }
+
+  // ── BLOCK 2: BOBBLEHEAD or TRANSFORMATION + STYLE ──
+  if (hasBobble && style !== 'caricature') {
+    prompt += 'Transformed into a hyper-detailed stylized bobblehead portrait with a proportionally enlarged head (approximately 1.5x natural scale) mounted on a slightly smaller torso, creating a charming collectible-figure aesthetic. Maintain ultra-detailed facial rendering — every pore, skin texture, and micro-expression preserved — while the body is rendered in a polished, miniature figurine style. ';
+    prompt += getThemeContext(theme);
+  } else if (style === 'caricature') {
+    prompt += getCaricatureBlock(theme, isGroup, hasGender);
+  } else {
+    prompt += getTransformDirective(theme, isReal);
+    prompt += getStyleBlock(style, isReal, theme);
+  }
+
+  // ── BLOCK 3: GENDERED WARDROBE ──
+  if (hasGender && style !== 'caricature') {
+    prompt += getWardrobe(theme, isReal);
+  }
+
+  // ── BLOCK 4: LOGO / BRANDING ──
+  if (hasLogo) {
+    prompt += 'A branded logo or visual reference is incorporated into the scene — appearing naturally on clothing, signage, event decor, or as an elegant watermark element integrated into the composition without disrupting the visual flow. ';
+  }
+
+  // ── BLOCK 5: SURVEY ──
+  if (hasSurvey) {
+    if (style === 'caricature') {
+      prompt += 'Their name appears in bold, playful hand-lettered text near or above the character — as if the caricature artist wrote it: [What is your name?]. ';
+    } else {
+      prompt += 'Their name appears in bold, stylized lettering naturally integrated into the scene — rendered on a nameplate, embroidered onto clothing, displayed on event signage, or floating as elegant typographic art: [What is your name?]. ';
+    }
+  }
+
+  // ── BLOCK 6: CUSTOM VIBE ──
+  if (vibe) prompt += vibe + '. ';
+
+  // ── BLOCK 7: CAMERA & LENS ──
+  if (hasCamera && isReal && style !== 'caricature') {
+    prompt += 'Camera & lens: captured on a full-frame sensor with an 85mm f/1.8 portrait lens at ISO 100, 1/200s shutter speed, producing extremely shallow depth of field with smooth, creamy bokeh separation. Ultra-detailed skin microtexture — visible pores, natural sheen, subtle subsurface scattering on half-lit planes, fine facial hairs catching rim light, and lifelike contact where hands meet fabric or skin. Slight cinematic grain for a premium film-quality finish. ';
+  }
+
+  // ── BLOCK 8: QUALITY CLOSER ──
+  prompt += getQualityCloser(style, isReal);
+
+  // ─── Display ───
+  displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobble, hasNeg, style, isReal, isStyled);
+}
+
+// ═══════════════════════════════════════
+// CARICATURE BLOCK (from your reference prompts)
+// ═══════════════════════════════════════
+function getCaricatureBlock(theme, isGroup, hasGender) {
+  let block = '';
+
+  // Art style
+  block += 'Art Style: Vibrant full-color ink and marker illustration on a pristine, clean white background, with rich, saturated hues and clear, crisp lines. Use thick, confident black outlines with visible, organic hand-drawn pen strokes, complemented by finer line work for subtle details, then layer smooth, even color fills and soft gradients to create depth and volume. ';
+
+  // Facial rendering
+  block += 'All facial features are illustrated entirely with pen lines and color — eyes drawn with bold outlines, expressive lashes, clear irises, and bright highlights; lips sketched with curved pen strokes and gently shaded color; skin rendered with warm, flattering tones, using cross-hatching, stippling, and color shading to create depth, volume, and soft shadows. Hair is depicted with flowing, dynamic pen strokes and rich color, showing texture, direction, and movement, with darker color masses for shadowed areas and lighter strokes for highlights. Nothing should appear photographic — everything must look like an artisanal, hand-drawn and hand-colored illustration. ';
+
+  // Proportions
+  block += 'Caricature Proportions: Subject(s) have exaggerated caricature proportions with oversized heads (approximately 60–70% of total height) and tiny, simplified bodies (20–30% of total height), clearly creating a playful big-head-small-body effect. ';
+
+  // Character details
+  block += 'Character Details: Facial features are completely illustrated in caricature style — slightly exaggerated but flattering, emphasizing charm and personality. Show expressive drawn eyes, genuine illustrated smiles or warm expressions, and distinctive sketched hairstyles that capture the subject\'s likeness. ';
+
+  // Theme-specific attire
+  if (hasGender) {
+    const attire = {
+      wedding: 'For female-presenting subjects: elegant bridal gown in ivory or champagne with illustrated lace details, flowing veil, delicate jewelry. For male-presenting subjects: formal tuxedo with bow tie, boutonnière, polished shoes. Clothing is simplified in form yet detailed with pen strokes and color shading indicating seams, folds, drapery, and fabric texture. ',
+      corporate: 'For female-presenting subjects: structured blazer in jewel tones over refined blouse, minimal elegant jewelry. For male-presenting subjects: tailored suit in navy or charcoal with crisp shirt and silk tie. Clothing is simplified in form yet detailed with pen strokes and color shading indicating seams, folds, and fabric texture. ',
+      quinceanera: 'The quinceañera wears a stunning illustrated ball gown in vibrant jewel tones with exaggerated tulle volume, sparkling tiara, and elegant jewelry. Chambelanes in coordinated formal suits. Clothing is simplified in form yet detailed with pen strokes showing beading, sequins, and fabric folds. ',
+      birthday: 'Subject(s) wear fun, festive party attire in bright, celebratory colors with party accessories like hats, noisemakers, or confetti in hand. Clothing is simplified in form yet detailed with pen strokes and playful color fills. ',
+      holiday: 'For female-presenting subjects: festive cocktail dress or elegant blouse in emerald, burgundy, or champagne gold with sparkle accents. For male-presenting subjects: refined blazer or vest over festive button-up in emerald, burgundy, or navy. Clothing is simplified in form yet detailed with pen strokes and warm, rich color shading. ',
+      cultural: 'Subject(s) wear culturally significant attire with vibrant traditional patterns, colors, and accessories rendered with careful pen detail and rich color. Clothing is simplified in form yet honors the cultural details with expressive illustration. ',
+      fashion: 'For female-presenting subjects: haute couture with bold silhouettes and statement accessories. For male-presenting subjects: designer menswear with fashion-forward details. Rendered in a stylized fashion-illustration meets caricature hybrid with detailed pen work. ',
+      sports: 'Subject(s) wear professional sports uniforms with team colors, visible jersey numbers, and athletic accessories. Athletic poses with exaggerated dynamic energy. Clothing rendered with clean color blocks and bold pen outlines. ',
+      custom: 'For female-presenting subjects: elegant formal dress or sophisticated outfit. For male-presenting subjects: sharp suit or formal attire with polished details. Clothing is simplified in form yet detailed with pen strokes and color shading indicating seams, folds, and fabric texture. '
+    };
+    block += attire[theme] || attire.custom;
+  } else {
+    block += 'Preserve the subject\'s exact clothing, accessories, and styling precisely as shown in the input photo. Render every garment detail — seams, folds, drapery, buttons, zippers, fabric texture — in the caricature illustration style using simplified forms with expressive pen strokes and color shading that captures the original outfit\'s character while maintaining the playful hand-drawn aesthetic. ';
+  }
+
+  // Scene elements
+  const scenes = {
+    wedding: 'Scene Elements: A simple ground line is lightly sketched and colored at the subjects\' feet to anchor them. Around the subjects, include small hand-drawn red and pink hearts, colorful confetti-like celebratory flourishes, delicate illustrated flower petals, and a few whimsical sparkle lines in bright colors to enhance the romantic, celebratory feel. ',
+    corporate: 'Scene Elements: A simple ground line anchors the subjects. Around them, include small illustrated stars, subtle geometric flourishes, and clean professional accent elements. ',
+    quinceanera: 'Scene Elements: A simple ground line anchors the subjects. Surround them with illustrated sparkles, small crowns, colorful confetti, floral flourishes in the event colors, and whimsical celebratory elements befitting a quinceañera. ',
+    birthday: 'Scene Elements: A simple ground line anchors the subjects. Surround them with illustrated balloons, colorful confetti, small stars, party streamers, and whimsical birthday cake or candle elements. ',
+    holiday: 'Scene Elements: A simple ground line anchors the subjects. Surround them with illustrated snowflakes, small ornaments, twinkling stars, holly berries, and warm seasonal flourishes. ',
+    custom: 'Scene Elements: A simple ground line is lightly sketched at the subjects\' feet. Around them, include small hand-drawn celebratory flourishes, colorful confetti elements, and whimsical sparkle lines to enhance the festive feel. '
+  };
+  block += scenes[theme] || scenes.custom;
+
+  // Background + composition
+  block += 'Background remains a clean, untextured white with no extra objects or scenery, keeping focus entirely on the caricature characters. ';
+
+  if (isGroup) {
+    block += 'Composition: Arrange subjects in a friendly, balanced group composition standing close together, slightly angled toward the viewer, with overlapping poses that suggest connection and affection. Ensure all figures are fully visible from head to toe within the frame. ';
+  } else {
+    block += 'Composition: The single subject is centered in the frame, fully visible from head to toe, with a confident, engaging pose angled slightly toward the viewer. ';
+  }
+
+  // Mood
+  block += 'Mood: Overall atmosphere is playful, charming, and celebratory, with a hint of romantic warmth and joy, as if created live by a skilled event caricature artist at a special celebration. Emphasize hand-crafted, artisanal quality in every line, shade, and color area. ';
+
+  return block;
+}
+
+// ═══════════════════════════════════════
+// THEME CONTEXT (short, for bobblehead)
+// ═══════════════════════════════════════
+function getThemeContext(theme) {
+  const ctx = { wedding:'Set within an elegant wedding celebration. ', corporate:'Set within a premium corporate environment. ', quinceanera:'Set within a regal quinceañera celebration. ', birthday:'Set within a vibrant birthday party. ', holiday:'Set within a festive holiday celebration. ', cultural:'Set within a culturally rich celebration. ', fashion:'Set within a high-fashion editorial studio. ', sports:'Set within an energetic sporting event. ', custom:'Set within a visually striking, themed environment tailored to the event. ' };
+  return ctx[theme] || '';
+}
+
+// ═══════════════════════════════════════
+// TRANSFORMATION DIRECTIVES
+// ═══════════════════════════════════════
+function getTransformDirective(theme, isReal) {
+  const d = {
+    wedding: isReal ? 'Transformed into a hyper-realistic, ultra-cinematic wedding portrait radiating romance, elegance, and emotional warmth. ' : 'Transformed into a charming, full-length wedding illustration with a soft, whimsical aesthetic that celebrates love and commitment. ',
+    corporate: isReal ? 'Reimagined in a premium, editorial-grade corporate portrait radiating authority, confidence, and executive polish. ' : 'Reimagined as a polished, stylized corporate portrait blending professional gravitas with creative flair. ',
+    quinceanera: isReal ? 'Transformed into a regal, cinematic quinceañera celebration portrait radiating cultural pride, elegance, and the joy of this milestone coming-of-age moment. ' : 'Transformed into a vibrant quinceañera illustration celebrating cultural tradition with artistic flourish and festive grandeur. ',
+    birthday: isReal ? 'Placed in a vibrant, cinematic birthday celebration scene bursting with energy, joy, and festive details. ' : 'Transformed into a playful, colorful birthday illustration overflowing with festive energy and whimsical charm. ',
+    holiday: isReal ? 'Reimagined in a warm, cinematic holiday portrait with rich seasonal colors, sparkling accents, and festive atmospheric magic. ' : 'Transformed into a festive holiday illustration with warm seasonal palette, twinkling lights, and cozy charm. ',
+    cultural: isReal ? 'Transformed into a stunningly rich, cinematic cultural celebration portrait honoring heritage with vibrant color and emotional depth. ' : 'Transformed into a beautifully detailed cultural celebration illustration rich with traditional motifs and vibrant palette. ',
+    fashion: isReal ? 'Reimagined as a hyper-realistic, high-fashion editorial portrait with magazine-cover production value and dramatic styling. ' : 'Reimagined as a bold, stylized fashion editorial illustration with avant-garde energy and visual impact. ',
+    sports: isReal ? 'Captured in a dynamic, hyper-realistic sports action portrait with athletic intensity, motion energy, and cinematic drama. ' : 'Transformed into a bold, dynamic sports illustration with exaggerated motion and vivid energy. ',
+    custom: isReal ? 'Transformed into an ultra-cinematic, editorial-quality portrait with premium production value, dramatic atmosphere, and magazine-worthy polish. ' : 'Transformed into a vibrant, highly detailed stylized portrait with rich artistic flair, bold visual impact, and keepsake-quality production value. '
+  };
+  return d[theme] || '';
+}
+
+// ═══════════════════════════════════════
+// DEEP STYLE BLOCKS
+// ═══════════════════════════════════════
+function getStyleBlock(style, isReal, theme) {
+  const S = {
+    cinematic: isReal
+      ? 'Lighting: extreme high-contrast cinematic lighting with a directional key light at 45° creating sculpted, razor-sharp highlights across cheekbones, jawline, and the bridge of the nose, with subtle warm rim lighting tracing the silhouette along hairline, shoulders, and arms for dimensional separation from the background. A secondary fill light at 15% intensity softens shadow transitions without flattening depth. Background features a smooth, professional gradient in deep navy, warm bronze, or rich charcoal tones with soft spotlight falloff and subtle atmospheric haze adding cinematic depth. Skin rendering: ultra-detailed microtexture with visible pores, natural sheen on highlighted planes, fine facial hairs catching rim light, and subtle subsurface scattering creating lifelike warmth in shadow transitions. The mood is editorial, confident, and commanding — a portrait that belongs on the cover of a premium publication. '
+      : 'Lighting is dramatic and cinematic with bold directional key light creating strong highlights and deep shadows. Rich tonal contrast with warm rim lighting defining silhouettes. Background features smooth gradient tones in deep navy, bronze, or warm charcoal with atmospheric depth. The mood is editorial, confident, and polished with magazine-cover production value. ',
+
+    watercolor: 'Transform this faithful replication into a whimsical, full-length watercolor illustration in a charming boutique style, utilizing loose, flowing watercolor techniques with layered translucent washes, visible brush strokes, and soft bleeding edges to create a light, airy feel. Paint skin with warm, natural tones and subtle rosy cheeks, rendering faces with clean, minimal line work for expressive eyes, warm genuine smiles, and personalized likeness — ensuring each subject remains instantly recognizable. Depict clothing with elegant watercolor washes that capture fabric texture, lace patterns, and folds through soft color layering and gentle gradients. If bouquets or floral accessories are present in the input photo, include them using delicate watercolor botanicals; do not add bouquets or flowers if they are not in the original. Surround the subjects with subtle, complementary watercolor botanical elements — soft eucalyptus leaves, delicate foliage, and light floral accents in muted sage greens, dusty rose, warm gold, and creams — that frame the composition without overwhelming the figures. Use a light, creamy background with gentle watercolor bleeds and washes for an ethereal, romantic atmosphere. ',
+
+    luxury: isReal
+      ? 'The scene exudes ultra-premium luxury and opulence. Rich textures dominate — velvet, silk, satin, gold leaf, and gleaming precious metals catch the light at every surface. Jewelry and accessories sparkle with photorealistic clarity, each facet and reflection rendered with precision. Lighting is clean, high-contrast, and warm with golden-hour tones — a primary beauty light creating flawless skin illumination, complemented by accent lights at 45° creating dimensional sparkle on metallic and jeweled surfaces. Background is a smooth deep-tone gradient in champagne, ivory, or deep navy with soft diffused spotlight creating an elegant vignette. Skin rendering emphasizes luminous, healthy texture with natural glow, refined pore detail, and subtle highlights on cheekbones and collarbones. The overall tone radiates wealth, confidence, and timeless sophistication — as if shot for a luxury brand campaign. '
+      : 'The scene radiates luxury through rich textures, gleaming jewelry, and refined styling. Warm golden lighting emphasizes sparkle and depth. Background is a smooth gradient in champagne, ivory, or deep navy with elegant spotlight vignette. The aesthetic is aspirational, sophisticated, and premium. ',
+
+    fantasy: isReal
+      ? 'The scene is set in a breathtaking, enchanted environment where golden-hour light filters through magical surroundings — an ancient forest clearing, crystal palace, or twilight garden of impossible blooms. Volumetric light rays pierce through atmospheric haze, creating ethereal god-rays that bathe the subjects in warm, dreamy illumination. Rich fabrics in jewel tones — deep emerald, sapphire blue, ruby red, and amethyst purple — drape and flow with photorealistic texture. Ornate crowns, tiaras, or jewelry catch individual light sources, creating tiny starbursts and prismatic reflections. Lighting is warm and multi-layered: a primary golden key light, secondary cool rim light defining silhouettes, and scattered practical lights from floating lanterns, fireflies, or magical particles suspended in air. Subtle bokeh renders background elements into dreamy, out-of-focus orbs of warm color. '
+      : 'Set in an enchanted, magical environment bathed in warm golden light. Rich jewel-tone fabrics, ornate crowns or jewelry, and atmospheric elements like floating particles, fireflies, or magical wisps create a fairytale mood. Soft dreamy bokeh, warm rim lighting, and layered atmospheric haze give otherworldly depth and romance. ',
+
+    retro: isReal
+      ? 'The scene channels authentic retro nostalgia with period-accurate color grading — warm amber, burnt sienna, avocado green, and cream tones reminiscent of vintage Kodachrome or Polaroid film stock. Subtle but visible film grain texture overlays the entire image with organic, analog warmth. Lighting mimics period-appropriate sources: warm tungsten practicals, neon accent colors, or diffused daylight through vintage window treatments. Era-appropriate set design — textured wallpaper, vintage furniture, retro signage, analog technology — fills the background with authentic period character. Color transitions are soft and slightly faded at edges, mimicking natural film vignetting. The mood is warm, nostalgic, and transportive — like discovering a perfectly preserved photograph from a golden era. '
+      : 'Authentic retro aesthetic with vintage color grading in warm amber, burnt orange, avocado, and cream tones with visible film grain. Period-appropriate styling, bold patterns, and era-specific environmental details. Warm, slightly faded palette with soft vignetting mimics vintage film stock. The mood is nostalgic, playful, and transportive. ',
+
+    pixar: 'Transform into a charming, hyper-detailed Pixar-style 3D animated character with smooth, polished skin surfaces retaining recognizable likeness — preserving the unique shape of eyes, nose, mouth, and facial structure while applying characteristic Pixar stylization: slightly enlarged expressive eyes with detailed iris reflections and catch-lights, a subtly reduced nose, smooth rounded features, and exaggerated yet emotionally authentic expressions. Hair rendered as sculpted, flowing 3D geometry with strand highlights and subsurface translucency. Clothing transforms into richly textured 3D fabric — each fold, wrinkle, and material type rendered with tactile realism. Set in a vibrant, fully realized 3D environment with warm, balanced studio lighting — primary key light creating soft facial shadows, bounced fill light, and colorful rim light separating character from a themed background. Colors are saturated, cheerful, and harmonious. Feels like an official production still from a AAA animated feature film. ',
+
+    bw: isReal
+      ? 'Capture in stunning high-contrast black and white with the depth, grain, and tonal richness of premium analog silver gelatin film. Lighting is dramatic and highly directional — a single powerful key light sculpts deep, defined shadows across facial planes, emphasizing bone structure, jawline definition, and textural detail of skin, fabric, and hair. Bright highlights roll smoothly into rich, inky blacks with full, continuous tonal range. Fine, organic film grain adds tactile analog warmth without sacrificing sharpness. Subtle vignetting darkens edges, drawing focus to the subject\'s eyes and expression. Skin shows every pore, fine line, and hair with clinical clarity in highlighted areas while shadow zones remain deep and mysterious. The monochrome palette creates timeless, emotionally powerful editorial sophistication. '
+      : 'Dramatic black and white with bold tonal contrast, rich shadows, and luminous highlights. Strong directional lighting emphasizes form, structure, and emotional intensity. Fine organic grain adds analog warmth. Timeless editorial sophistication with powerful emotional impact. ',
+
+    anime: isReal
+      ? 'Render in bold, high-energy anime or manga-inspired style with vivid, saturated colors, dramatic cel-shading with sharp shadow edges, and clean confident linework. Dynamic composition with exaggerated perspective — slightly low camera angle for heroic framing. Motion lines, speed streaks, or energy auras radiate from the subject. Eyes are large, expressive, and detailed with vibrant iris colors, specular highlights, and emotional depth. Hair flows dynamically with strand groups catching colored highlights. Background features bold graphic elements — radiating lines, color gradients, particle effects. Lighting follows anime conventions: strong rim light in contrasting color, dramatic cast shadows, and selective highlight flares. Feels like a key visual from a premium anime production. '
+      : 'Bold anime or comic-book style with vivid saturated colors, dramatic cel-shading, and clean linework. Dynamic composition with exaggerated pose, motion lines, and energy effects. Large expressive eyes, flowing dynamic hair, and bold graphic background. High-energy and visually striking. ',
+
+    collectible: 'Posed standing upright as if packaged inside a retail-style collectible display box with a transparent, slightly reflective plastic front panel showing realistic material properties — subtle reflections, edge distortion, and thickness at corners. Box interior themed to match the event with miniature accessories, props, and environmental details. Outer box features bold, clean professional lettering with event name, high-quality packaging design with realistic corrugated cardboard textures on visible edges, branded color palette, UPC codes, logos, and feature callouts. Plastic front panel shows soft studio reflections. Lit with clean product photography lighting — soft overhead key, subtle fill from below, and accent lights creating depth on box surfaces. ',
+
+    customStyle: isReal
+      ? 'Lighting: dramatic, high-contrast directional lighting with a warm key light at 45° sculpting defined highlights across facial planes, complemented by subtle rim lighting tracing the silhouette for dimensional separation. A soft fill light at 20% intensity preserves shadow detail without flattening depth. Background features a smooth, professional gradient with soft atmospheric haze adding cinematic depth. Skin rendering: ultra-detailed microtexture with visible pores, natural sheen on highlighted planes, and subtle subsurface scattering creating lifelike warmth. The overall mood is polished, intentional, and visually striking — crafted to feel premium and print-worthy. '
+      : 'Rendered in a bold, highly detailed artistic style with rich saturated colors, confident linework or brushwork, and strong visual impact. Lighting is dramatic with warm directional key light creating defined highlights and atmospheric shadows. Background features complementary tones with depth and visual interest — gradient colors, environmental details, or thematic elements that enhance the composition without overwhelming the subject. Colors are vibrant and harmonious with intentional contrast between subject and background. The overall aesthetic is polished, expressive, and visually striking — a keepsake-quality artistic portrait with professional production value. '
+  };
+  return S[style] || '';
+}
+
+// ═══════════════════════════════════════
+// GENDERED WARDROBE
+// ═══════════════════════════════════════
+function getWardrobe(theme, isReal) {
+  const d = isReal ? 'with photorealistic fabric textures, natural draping, and visible material quality ' : '';
+  const W = {
+    wedding: `For female looks: elegant flowing gown in ivory, champagne, blush, or soft gold with delicate lace, beadwork, or embroidery ${d}— refined jewelry, soft floral hair accessories or veil, classic bridal shoes. For male looks: tailored suit in charcoal, navy, or warm grey with crisp white shirt, silk tie or bowtie, fresh boutonnière, polished dress shoes, subtle cufflinks. `,
+    corporate: `For female looks: structured power blazer in burgundy, emerald, sapphire, or warm camel over refined blouse ${d}— minimal gold or silver jewelry, quality watch, polished heels. For male looks: tailored navy, charcoal, or slate suit with crisp white or light blue shirt, silk tie, polished oxfords ${d}— quality timepiece, subtle pocket square. `,
+    holiday: `For female looks: elegant holiday cocktail dress in emerald, burgundy, champagne gold, or cranberry with sparkle accents ${d}— festive jewelry and seasonal accessories. For male looks: refined blazer or vest over festive button-up in emerald, burgundy, or navy ${d}— metallic tie or festive pocket square. `,
+    quinceanera: `For the quinceañera: breathtaking ball gown in royal purple, fuchsia, champagne gold, or emerald with beading, sequins, layered tulle ${d}— sparkling tiara, coordinated jewelry, satin gloves. For chambelanes: formal suits in coordinating colors with polished shoes and boutonnieres. `,
+    sports: `Professional sports uniform with authentic athletic detailing — visible jersey number, team color blocking, performance fabric texture ${d}— athletic footwear and sport-specific equipment. `,
+    fashion: `For female looks: haute couture with architectural silhouettes, statement fabrics, bold contrasts, editorial accessories ${d}. For male looks: designer menswear with fashion-forward details, unconventional proportions, premium fabrics ${d}. `
+  };
+  return W[theme] || `Elegant attire in warm or jewel tones appropriate to the occasion ${d}— refined accessories and polished finishing touches. `;
+}
+
+// ═══════════════════════════════════════
+// QUALITY CLOSER
+// ═══════════════════════════════════════
+function getQualityCloser(style, isReal) {
+  const C = {
+    caricature: 'Emphasize hand-crafted, artisanal quality in every line, shade, and color area. The final caricature should feel like a premium, gift-worthy keepsake created by a world-class event caricature artist. High resolution, highly detailed, professional hand-drawn illustration quality.',
+    watercolor: 'Resulting in fashion-forward, boutique-quality portraiture that is whimsical yet sophisticated — hand-painted watercolor look, high detail in faces and attire, joyful celebratory mood. High resolution, highly detailed, professional finish, 4k quality.',
+    pixar: 'The final image feels like an official production still from a high-budget animated feature — polished, emotionally engaging, technically flawless. High resolution, highly detailed, professional 3D render quality.',
+    collectible: 'Studio-lit environment with sharp clarity, professional product photography aesthetic, hyper-realistic packaging materials. High resolution, highly detailed, photorealistic product photography style.',
+    anime: 'The final image radiates kinetic energy, emotional expressiveness, and visual impact — a premium anime-style portrait. High resolution, vivid detail, professional illustration quality.',
+    bw: 'Mood: timeless, emotionally powerful, editorially sophisticated — a monochrome portrait destined for gallery exhibition. High resolution, fine-grain detail, premium analog film aesthetic.'
+  };
+  if (C[style]) return C[style];
+  if (isReal) return 'Mood: the final image radiates emotional authenticity, cinematic production value, and magazine-quality polish. Every element — skin texture, fabric detail, atmospheric lighting — converges into a portrait that feels premium, intentional, and worth printing large. High resolution, highly detailed, professional finish, 4k photorealistic quality.';
+  return 'The final image feels polished, vibrant, and visually cohesive — a keepsake-quality portrait radiating artistic flair, emotional warmth, and professional production value. High resolution, highly detailed, 4k quality.';
+}
+
+// ═══════════════════════════════════════
+// DISPLAY OUTPUT
+// ═══════════════════════════════════════
+function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobble, hasNeg, style, isReal, isStyled) {
+  const outputCard = document.getElementById('outputCard');
+  document.getElementById('promptOutput').textContent = prompt;
+
+  const t = { wedding:'Wedding', corporate:'Corporate', quinceanera:'Quinceañera', birthday:'Birthday', holiday:'Holiday', cultural:'Cultural', fashion:'Fashion', sports:'Sports', custom:'Custom' };
+  const s = { cinematic:'Cinematic', watercolor:'Watercolor', luxury:'Luxury', fantasy:'Fantasy', retro:'Retro', pixar:'Pixar 3D', bw:'B&W', anime:'Anime', collectible:'Collectible', caricature:'Caricature', customStyle:'Custom' };
+  document.getElementById('promptTitle').textContent = `${t[state.theme]||'Custom'} — ${s[style]||'Custom'} Portrait`;
+
+  const FN = { bananaFXReal:'Realistic Group', bananaFXStyled:'Stylized Single', bananaFXPro:'Pro Realistic Group', bananaFXAnimated:'Animated / 3D', personaFXReal:'Realistic Single', personaFXProReal:'Pro Realistic Single', personaFXStyled:'Stylized Group' };
+
+  document.getElementById('outputMeta').innerHTML = `
+    <span class="meta-tag">${FN[filter]||filter}</span>
+    <span class="meta-tag">${ratio}</span>
+    <span class="meta-tag">${pose==='random'?'Random Pose':'Original Pose'}</span>
+    ${hasLogo?'<span class="meta-tag">Logo / Ref</span>':''}
+    ${hasSurvey?'<span class="meta-tag">Survey</span>':''}
+    ${hasBobble?'<span class="meta-tag">Bobblehead</span>':''}
+  `;
+
+  const negSection = document.getElementById('negSection');
+  if (hasNeg) {
+    let neg = 'blurry, low quality, pixelated, distorted faces, extra limbs, extra fingers, deformed hands, watermark, text overlay (unless specified), cropped composition, oversaturated, noisy, grainy';
+    if (isReal) neg += ', cartoon, anime, illustration, painting style, unrealistic skin, plastic skin, mannequin-like';
+    if (isStyled && style !== 'bw') neg += ', photorealistic, dull colors, flat lighting';
+    if (style === 'watercolor') neg += ', photorealistic, hard edges, digital rendering, vector art, sharp outlines';
+    if (style === 'caricature') neg += ', photorealistic, photo filter effect, smooth digital rendering, 3D render, plastic look, generic clip-art style';
+    if (style === 'bw') neg += ', color, saturation, warm tones, cool tones';
+    if (style !== 'bw') neg += ', all-black clothing, predominantly black background, dark muddy tones';
+    document.getElementById('negOutput').textContent = neg;
+    negSection.style.display = 'block';
+  } else { negSection.style.display = 'none'; }
+
+  // Checklist
+  const CC = { bananaFXReal:'Standard', bananaFXStyled:'Standard', bananaFXPro:'Higher', bananaFXAnimated:'Standard', personaFXReal:'4 credits', personaFXProReal:'5 credits', personaFXStyled:'4 credits' };
+  let list = `☐ In your booth software: Enable AI Experience → Save Changes<br>`;
+  list += `☐ Add AI Filter → Select <strong>${FN[filter]||filter}</strong><br>`;
+  list += `☐ Paste prompt into the prompt field<br>`;
+  list += `☐ Set Pose: <strong>${pose==='random'?'Random (recommended)':'Keep Original'}</strong><br>`;
+  list += `☐ Set Aspect Ratio: <strong>${ratio}</strong> — match to your template<br>`;
+  if (hasSurvey) { list += `☐ Enable Surveys → insert [What is your name?]<br>`; }
+  if (hasLogo && (filter==='bananaFXPro'||filter==='personaFXProReal')) { list += `☐ Upload reference/logo under Options → Reference Image<br>`; }
+  else if (hasLogo) { list += `⚠️ Logo upload requires a Pro-tier AI filter<br>`; }
+  list += `☐ Assign filter to template → Test render — Credits: <strong>${CC[filter]||'Standard'}</strong><br>`;
+  list += `<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing forward, natural smile.`;
+  document.getElementById('tipsContent').innerHTML = list;
+
+  outputCard.classList.add('visible');
+  outputCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelectorAll('.step-dot').forEach(d => d.classList.add('completed'));
+}
+
+// ═══════════════════════════════════════
+// REVERSE ENGINEER
+// ═══════════════════════════════════════
+function selectREFilter(btn) {
+  document.querySelectorAll('#reFilterRow .toggle-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.reFilter = btn.dataset.val;
+}
+
+function selectREClothing(btn) {
+  document.querySelectorAll('#reClothingRow .toggle-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.reClothing = btn.dataset.val;
+}
+
+function handleREUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const img = document.getElementById('rePreview');
+    img.src = ev.target.result;
+    img.style.display = 'block';
+    state.reImageData = ev.target.result;
+    document.querySelector('#reUploadZone p').innerHTML = '✓ Image loaded — <strong>click Analyze below</strong>';
+  };
+  reader.readAsDataURL(file);
+}
+
+// Drag and drop
+document.addEventListener('DOMContentLoaded', function() {
+  const zone = document.getElementById('reUploadZone');
+  if (zone) {
+    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor = 'var(--gold)'; });
+    zone.addEventListener('dragleave', function() { zone.style.borderColor = 'var(--dark-border)'; });
+    zone.addEventListener('drop', function(e) {
+      e.preventDefault(); zone.style.borderColor = 'var(--dark-border)';
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          document.getElementById('rePreview').src = ev.target.result;
+          document.getElementById('rePreview').style.display = 'block';
+          state.reImageData = ev.target.result;
+          document.querySelector('#reUploadZone p').innerHTML = '✓ Image loaded — <strong>click Analyze below</strong>';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+});
+
+async function reverseEngineer() {
+  if (!state.reImageData) { alert('Please upload an image first'); return; }
+
+  const analyzing = document.getElementById('reAnalyzing');
+  const outputCard = document.getElementById('reOutputCard');
+  analyzing.style.display = 'block';
+  outputCard.classList.remove('visible');
+
+  const filterHint = state.reFilter !== 'unknown' ? `The AI filter used was ${state.reFilter}. ` : '';
+
+  // Clothing instruction based on user selection
+  let clothingInstruction = '';
+  if (state.reClothing === 'neutral') {
+    clothingInstruction = `CRITICAL CLOTHING RULE: Do NOT describe any specific clothing, dress, gown, suit, or outfit in the prompt. Instead, ALWAYS write "Preserve the subject's exact clothing, accessories, and styling precisely as shown in the input photo, rendering every garment detail, fabric texture, fold, and drape in the chosen art style." This makes the prompt work for ANY person regardless of gender or outfit.`;
+  } else if (state.reClothing === 'gendered') {
+    clothingInstruction = `CLOTHING RULE: At the end of the style description, add a gendered wardrobe section: "For female-presenting subjects: [describe elegant feminine attire appropriate to this style with specific fabrics, colors, and details]. For male-presenting subjects: [describe equivalent masculine attire appropriate to this style with specific fabrics, colors, and details]." Make both options match the same style/formality level shown in the image.`;
+  } else {
+    clothingInstruction = `CLOTHING RULE: Describe the exact outfit shown in the image with full detail — specific garment type, color, fabric, construction details, draping, and accessories. This prompt is designed to recreate this specific look.`;
+  }
+
+  // Detect media type from data URL
+  let mediaType = 'image/jpeg';
+  if (state.reImageData.startsWith('data:image/png')) mediaType = 'image/png';
+  else if (state.reImageData.startsWith('data:image/webp')) mediaType = 'image/webp';
+  else if (state.reImageData.startsWith('data:image/gif')) mediaType = 'image/gif';
+
+  const base64Data = state.reImageData.split(',')[1];
+
+  const analysisPrompt = `You are a AI photo booth prompt engineer. Analyze this AI-generated photo booth image and write a prompt that recreates this exact style. ${filterHint}
+
+Your prompts must be extremely specific. Here's the level of detail required:
+
+CARICATURE EXAMPLE: "Turn this photo into a charming, highly detailed, fully colored hand-drawn caricature illustration. This is a complete artistic transformation — not a photo filter or effect. Every element must be fully redrawn. Art Style: Vibrant full-color ink and marker illustration with rich saturated hues and clear crisp lines. Use thick confident black outlines with visible organic hand-drawn pen strokes. All facial features illustrated with pen lines and color — eyes with bold outlines, expressive lashes, clear irises, bright highlights; lips with curved pen strokes; skin with warm tones using cross-hatching, stippling, and color shading. Caricature Proportions: oversized heads approximately 60-70% of total height, tiny simplified bodies 20-30%."
+
+CINEMATIC EXAMPLE: "Lighting: extreme high-contrast cinematic lighting with directional key light at 45° creating sculpted razor-sharp highlights across cheekbones and jawline, warm rim lighting tracing the silhouette along hairline and shoulders. Secondary fill at 15% intensity. Skin: ultra-detailed microtexture with visible pores, natural sheen, subsurface scattering in shadow transitions."
+
+Write a SINGLE complete prompt paragraph (200+ words) ready to paste into your booth software. No headers, no bullet points, no intro. Start directly with "Turn this photo into..." or "Preserve the subject's..." Be extremely specific about techniques, angles, percentages, proportions, materials, and rendering methods.
+
+${clothingInstruction}
+
+After the prompt, on a NEW LINE, write exactly this format (no other text):
+---SETTINGS---
+FILTER: [recommend exactly one: Realistic Group, Stylized Single, Pro Realistic Group, Animated / 3D, Realistic Single, Pro Realistic Single, Stylized Group]
+STYLE: [photorealistic, stylized, caricature, 3d, anime, watercolor, or other]
+PEOPLE: [single or group based on what you see]
+POSE: [Random or Keep Original - recommend Random for stylized/caricature, Keep Original for photorealistic]
+RATIO: [Square 1024x1024, Portrait 768x1024, or Landscape 1024x768 based on image orientation]
+
+Filter selection rules:
+- Photorealistic single person → Realistic Single
+- Photorealistic group → Realistic Group
+- Stylized/caricature/watercolor single person → Stylized Single
+- Stylized/caricature/watercolor group → Stylized Group
+- 3D/Pixar/Animated → Animated / 3D
+- If a logo or reference image overlay is visible → use Pro version (Pro Realistic Group or Pro Realistic Single)`;
+
+  try {
+    const response = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        system: "",
+        messages: [{
+          role: "user",
+          content: [
+            {
+              type: "image",
+              source: {
+                type: "base64",
+                media_type: mediaType,
+                data: base64Data
+              }
+            },
+            {
+              type: "text",
+              text: analysisPrompt
+            }
+          ]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || "API error " + response.status);
+    }
+
+    const data = await response.json();
+    const fullText = data.content
+      .filter(function(item) { return item.type === "text"; })
+      .map(function(item) { return item.text; })
+      .join("\n");
+
+    // Parse out the prompt and settings
+    let promptText = fullText;
+    let settings = {};
+    
+    if (fullText.includes('---SETTINGS---')) {
+      const parts = fullText.split('---SETTINGS---');
+      promptText = parts[0].trim();
+      const settingsBlock = parts[1] || '';
+      
+      const filterMatch = settingsBlock.match(/FILTER:\s*(.+)/i);
+      const styleMatch = settingsBlock.match(/STYLE:\s*(.+)/i);
+      const peopleMatch = settingsBlock.match(/PEOPLE:\s*(.+)/i);
+      const poseMatch = settingsBlock.match(/POSE:\s*(.+)/i);
+      const ratioMatch = settingsBlock.match(/RATIO:\s*(.+)/i);
+      
+      settings.filter = filterMatch ? filterMatch[1].trim() : '';
+      settings.style = styleMatch ? styleMatch[1].trim() : '';
+      settings.people = peopleMatch ? peopleMatch[1].trim() : '';
+      settings.pose = poseMatch ? poseMatch[1].trim() : '';
+      settings.ratio = ratioMatch ? ratioMatch[1].trim() : '';
+    }
+
+    analyzing.style.display = 'none';
+    document.getElementById('rePromptOutput').textContent = promptText;
+
+    let metaHTML = '';
+    if (settings.filter) metaHTML += '<span class="meta-tag">' + settings.filter + '</span>';
+    if (settings.style) metaHTML += '<span class="meta-tag">' + settings.style + '</span>';
+    if (state.reFilter !== 'unknown') metaHTML += '<span class="meta-tag">User: ' + state.reFilter + '</span>';
+    metaHTML += '<span class="meta-tag">Reverse Engineered</span>';
+    document.getElementById('reOutputMeta').innerHTML = metaHTML;
+
+    // Build setup checklist
+    let checklist = '☐ In your booth software: Enable AI Experience → Save Changes<br>';
+    if (settings.filter) {
+      checklist += '☐ Add AI Filter → Select <strong>' + settings.filter + '</strong><br>';
+    }
+    checklist += '☐ Paste the prompt above into the prompt field<br>';
+    if (settings.pose) {
+      checklist += '☐ Set Pose: <strong>' + settings.pose + '</strong><br>';
+    }
+    if (settings.ratio) {
+      checklist += '☐ Set Aspect Ratio: <strong>' + settings.ratio + '</strong> — match to your template<br>';
+    }
+    if (settings.filter && (settings.filter.includes('Pro') || settings.filter.includes('pro'))) {
+      checklist += '☐ Upload reference/logo under Options → Reference Image<br>';
+    }
+    
+    // Credit info
+    const creditMap = {
+      'Realistic Group': 'Standard',
+      'Stylized Single': 'Standard',
+      'Pro Realistic Group': 'Higher',
+      'Animated / 3D': 'Standard',
+      'Realistic Single': '4 credits',
+      'Pro Realistic Single': '5 credits',
+      'Stylized Group': '4 credits'
+    };
+    const credits = settings.filter ? (creditMap[settings.filter] || 'Standard') : 'Standard';
+    checklist += '☐ Assign filter to template → Test render — Credits: <strong>' + credits + '</strong><br>';
+    checklist += '<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing forward, natural smile.';
+    
+    document.getElementById('reTips').innerHTML = checklist;
+
+    outputCard.classList.add('visible');
+    outputCard.scrollIntoView({ behavior: 'smooth' });
+
+  } catch (err) {
+    analyzing.style.display = 'none';
+    console.error('RE Error:', err);
+    alert('Analysis failed: ' + err.message + '\n\nNote: This feature works when viewing the file inside Claude.ai artifacts. If you downloaded the HTML file, the API connection won\'t be available.');
+  }
+}
+
+// ═══════════════════════════════════════
+// COPY FUNCTIONS
+// ═══════════════════════════════════════
+function copyPrompt() {
+  navigator.clipboard.writeText(document.getElementById('promptOutput').textContent).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy Prompt'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function copyNeg() {
+  navigator.clipboard.writeText(document.getElementById('negOutput').textContent).then(() => {
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => { btn.textContent = 'Copy Negative Prompt'; }, 2000);
+  });
+}
+
+function copyREPrompt() {
+  navigator.clipboard.writeText(document.getElementById('rePromptOutput').textContent).then(() => {
+    const btn = document.getElementById('reCopyBtn');
+    btn.textContent = '✓ Copied!'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy Prompt'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
