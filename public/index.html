@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Photo Booth Prompt Engine</title>
+<title>AI Photo Booth Prompt Engine — Free Access</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -292,6 +292,67 @@ textarea::placeholder { color: var(--text-muted); }
   .card { padding: 24px; }
   .selection-grid { grid-template-columns: repeat(2, 1fr); }
 }
+/* Email Gate */
+.gate-overlay { position: relative; z-index: 10; }
+.gate-card {
+  background: var(--dark-card);
+  border: 1.5px solid var(--gold);
+  border-radius: 20px;
+  padding: 48px 36px;
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(212,115,140,0.12);
+  animation: fadeIn 0.6s ease forwards;
+}
+.gate-card .gate-icon { font-size: 48px; margin-bottom: 16px; }
+.gate-card h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; margin-bottom: 8px; color: var(--text);
+}
+.gate-card .gate-sub {
+  font-size: 14px; color: var(--text-muted); margin-bottom: 28px; line-height: 1.6;
+}
+.gate-features { text-align: left; margin: 0 auto 28px; max-width: 360px; }
+.gate-feature {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 14px; font-size: 13px; color: var(--text); line-height: 1.5;
+}
+.gate-feature .check { color: var(--success); font-weight: 700; font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.gate-form { display: flex; flex-direction: column; gap: 10px; }
+.gate-input {
+  width: 100%; padding: 14px 18px;
+  border: 1.5px solid var(--dark-border); border-radius: 10px;
+  background: var(--dark-input); color: var(--text);
+  font-family: 'DM Sans', sans-serif; font-size: 14px;
+  outline: none; transition: border-color 0.3s;
+}
+.gate-input:focus { border-color: var(--gold); }
+.gate-input::placeholder { color: var(--text-muted); }
+.gate-btn {
+  width: 100%; padding: 16px;
+  background: linear-gradient(135deg, var(--gold), var(--accent));
+  border: none; border-radius: 12px; color: #fff;
+  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all 0.3s; letter-spacing: 0.5px;
+}
+.gate-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(212,115,140,0.3); }
+.gate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+.gate-fine { font-size: 11px; color: var(--text-muted); margin-top: 12px; }
+.gate-error { color: #d44; font-size: 12px; margin-top: 6px; display: none; }
+
+.tool-section { display: none; }
+.tool-section.unlocked { display: block; animation: fadeIn 0.6s ease forwards; }
+
+.pro-banner {
+  background: linear-gradient(135deg, rgba(212,115,140,0.08), rgba(196,96,122,0.08));
+  border: 1.5px solid rgba(212,115,140,0.3);
+  border-radius: 16px; padding: 28px 32px;
+  margin-top: 40px; text-align: center;
+}
+.pro-banner h3 { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--gold); margin-bottom: 6px; }
+.pro-banner p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
 </style>
 </head>
 <body>
@@ -304,73 +365,50 @@ textarea::placeholder { color: var(--text-muted); }
     <p class="subtitle">Generate copy-paste-ready AI prompts for your photo booth AI filters</p>
   </div>
 
-  <!-- Mode Tabs -->
-  <div class="mode-tabs">
-    <button class="mode-tab active" onclick="switchMode('build')">✦ Build a Prompt</button>
-    <button class="mode-tab" onclick="switchMode('reverse')">🔍 Reverse Engineer</button>
-  </div>
-
   <!-- ═══════════════════════════════════════ -->
-  <!-- REVERSE ENGINEER MODE -->
+  <!-- EMAIL GATE -->
   <!-- ═══════════════════════════════════════ -->
-  <div class="re-section" id="reverseSection">
-    <div class="card">
-      <div class="card-label">Reverse Engineer</div>
-      <h3>Upload an AI Photo to Get Its Prompt</h3>
-      <p class="desc">Upload an AI-generated photo booth image and I'll analyze the style, lighting, rendering technique, and write a prompt that recreates the look.</p>
+  <div class="gate-overlay" id="gateOverlay">
+    <div class="gate-card">
+      <div class="gate-icon">✦</div>
+      <h2>Get Free Access</h2>
+      <p class="gate-sub">Stop buying $5–$15 prompts. Build unlimited custom AI photo booth prompts in seconds.</p>
 
-      <div class="re-upload-zone" id="reUploadZone" onclick="document.getElementById('reFileInput').click()">
-        <div class="icon">📸</div>
-        <p>Click to upload or drag & drop<br><strong>JPG, PNG, or WebP</strong></p>
-      </div>
-      <input type="file" id="reFileInput" accept="image/*" style="display:none" onchange="handleREUpload(event)">
-      <img id="rePreview" class="re-preview">
-
-      <div style="margin-top: 16px;">
-        <div class="card-label" style="margin-bottom: 10px;">What filter was used? (if you know)</div>
-        <div class="toggle-row" id="reFilterRow">
-          <button class="toggle-chip active" onclick="selectREFilter(this)" data-val="unknown">Not sure</button>
-          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXStyled">Stylized Single</button>
-          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXReal">Realistic Group</button>
-          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="personaFXStyled">Stylized Group</button>
-          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="personaFXReal">Realistic Single</button>
+      <div class="gate-features">
+        <div class="gate-feature">
+          <span class="check">✓</span>
+          <span><strong>11 Art Styles</strong> — Cinematic, Watercolor, Caricature, Pixar 3D, Anime, and more</span>
+        </div>
+        <div class="gate-feature">
+          <span class="check">✓</span>
+          <span><strong>9 Event Themes</strong> — Wedding, Corporate, Quinceañera, Holiday, and more</span>
+        </div>
+        <div class="gate-feature">
+          <span class="check">✓</span>
+          <span><strong>Auto Filter Selection</strong> — Picks the best AI filter for your setup</span>
+        </div>
+        <div class="gate-feature">
+          <span class="check">✓</span>
+          <span><strong>Copy-Paste Ready</strong> — Prompts formatted for your booth software</span>
         </div>
       </div>
 
-      <div style="margin-top: 16px;">
-        <div class="card-label" style="margin-bottom: 10px;">Clothing in the prompt?</div>
-        <div class="toggle-row" id="reClothingRow">
-          <button class="toggle-chip active" onclick="selectREClothing(this)" data-val="neutral">Anyone can use it (gender-neutral)</button>
-          <button class="toggle-chip" onclick="selectREClothing(this)" data-val="gendered">Add "For female / For male" options</button>
-          <button class="toggle-chip" onclick="selectREClothing(this)" data-val="exact">Match this exact outfit</button>
-        </div>
+      <div class="gate-form">
+        <input type="text" class="gate-input" id="gateName" placeholder="First name (optional)">
+        <input type="email" class="gate-input" id="gateEmail" placeholder="Your email address" required>
+        <button class="gate-btn" id="gateBtn" onclick="submitGate()">✦ Get Free Access</button>
+        <div class="gate-error" id="gateError"></div>
       </div>
 
-      <button class="generate-btn" style="margin-top: 20px" onclick="reverseEngineer()">🔍 Analyze & Generate Prompt</button>
-
-      <div class="re-analyzing" id="reAnalyzing">
-        <div class="spinner"></div>
-        <p>Analyzing style, lighting, rendering technique... (may take 10-15 seconds)</p>
-      </div>
-    </div>
-
-    <div class="output-card" id="reOutputCard">
-      <div class="output-header">
-        <h3 id="rePromptTitle">Reverse Engineered Prompt</h3>
-        <button class="copy-btn" id="reCopyBtn" onclick="copyREPrompt()">Copy Prompt</button>
-      </div>
-      <div class="output-meta" id="reOutputMeta"></div>
-      <div class="prompt-output" id="rePromptOutput"></div>
-      <div class="tips">
-        <h4>Booth Setup Checklist</h4>
-        <div class="setup-checklist" id="reTips"></div>
-      </div>
+      <p class="gate-fine">No spam, ever. We'll only send you photo booth tips & tool updates.</p>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════ -->
-  <!-- BUILD MODE -->
+  <!-- TOOL (hidden until email submitted) -->
   <!-- ═══════════════════════════════════════ -->
+  <div class="tool-section" id="toolSection">
+
   <div class="builder-section" id="builderSection">
 
   <div class="steps">
@@ -559,9 +597,67 @@ textarea::placeholder { color: var(--text-muted); }
 
   </div><!-- end builder section -->
 
+  <!-- Pro upsell -->
+  <div class="pro-banner">
+    <h3>🔍 Want Reverse Engineer?</h3>
+    <p>Upload any AI photo and get the exact prompt that created it. Coming soon — watch your inbox for early access.</p>
+  </div>
+
+  </div><!-- end tool section -->
+
 </div>
 
 <script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+// ═══════════════════════════════════════
+// EMAIL GATE
+// ═══════════════════════════════════════
+function checkAccess() {
+  if (localStorage.getItem('pe_access') === 'granted') {
+    unlockTool();
+  }
+}
+
+async function submitGate() {
+  const email = document.getElementById('gateEmail').value.trim();
+  const name = document.getElementById('gateName').value.trim();
+  const btn = document.getElementById('gateBtn');
+  const err = document.getElementById('gateError');
+
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    err.textContent = 'Please enter a valid email address';
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Unlocking...';
+  err.style.display = 'none';
+
+  try {
+    await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name })
+    });
+  } catch (e) {
+    console.log('Subscribe endpoint error:', e);
+  }
+
+  localStorage.setItem('pe_access', 'granted');
+  localStorage.setItem('pe_email', email);
+  unlockTool();
+}
+
+function unlockTool() {
+  document.getElementById('gateOverlay').style.display = 'none';
+  document.getElementById('toolSection').classList.add('unlocked');
+}
+
+checkAccess();
+
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
@@ -569,19 +665,8 @@ const state = {
   filter: '', theme: '', style: '',
   modifiers: new Set(), pose: 'random',
   ratio: 'Square (1024×1024)',
-  people: '', look: '', refImage: '',
-  reFilter: 'unknown', reImageData: null, reClothing: 'neutral'
+  people: '', look: '', refImage: ''
 };
-
-// ═══════════════════════════════════════
-// MODE SWITCHING
-// ═══════════════════════════════════════
-function switchMode(mode) {
-  document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('builderSection').classList.toggle('hidden', mode === 'reverse');
-  document.getElementById('reverseSection').classList.toggle('visible', mode === 'reverse');
-}
 
 // ═══════════════════════════════════════
 // STEP 1: AUTO FILTER SELECTION
@@ -861,7 +946,7 @@ function getCaricatureBlock(theme, isGroup, hasGender) {
 // THEME CONTEXT (short, for bobblehead)
 // ═══════════════════════════════════════
 function getThemeContext(theme) {
-  const ctx = { wedding:'Set within an elegant wedding celebration. ', corporate:'Set within a premium corporate environment. ', quinceanera:'Set within a regal quinceañera celebration. ', birthday:'Set within a vibrant birthday party. ', holiday:'Set within a festive holiday celebration. ', cultural:'Set within a culturally rich celebration. ', fashion:'Set within a high-fashion editorial studio. ', sports:'Set within an energetic sporting event. ', custom:'' };
+  const ctx = { wedding:'Set within an elegant wedding celebration. ', corporate:'Set within a premium corporate environment. ', quinceanera:'Set within a regal quinceañera celebration. ', birthday:'Set within a vibrant birthday party. ', holiday:'Set within a festive holiday celebration. ', cultural:'Set within a culturally rich celebration. ', fashion:'Set within a high-fashion editorial studio. ', sports:'Set within an energetic sporting event. ', custom:'Set within a visually striking, themed environment tailored to the event. ' };
   return ctx[theme] || '';
 }
 
@@ -878,7 +963,7 @@ function getTransformDirective(theme, isReal) {
     cultural: isReal ? 'Transformed into a stunningly rich, cinematic cultural celebration portrait honoring heritage with vibrant color and emotional depth. ' : 'Transformed into a beautifully detailed cultural celebration illustration rich with traditional motifs and vibrant palette. ',
     fashion: isReal ? 'Reimagined as a hyper-realistic, high-fashion editorial portrait with magazine-cover production value and dramatic styling. ' : 'Reimagined as a bold, stylized fashion editorial illustration with avant-garde energy and visual impact. ',
     sports: isReal ? 'Captured in a dynamic, hyper-realistic sports action portrait with athletic intensity, motion energy, and cinematic drama. ' : 'Transformed into a bold, dynamic sports illustration with exaggerated motion and vivid energy. ',
-    custom: ''
+    custom: isReal ? 'Transformed into an ultra-cinematic, editorial-quality portrait with premium production value, dramatic atmosphere, and magazine-worthy polish. ' : 'Transformed into a vibrant, highly detailed stylized portrait with rich artistic flair, bold visual impact, and keepsake-quality production value. '
   };
   return d[theme] || '';
 }
@@ -918,7 +1003,9 @@ function getStyleBlock(style, isReal, theme) {
 
     collectible: 'Posed standing upright as if packaged inside a retail-style collectible display box with a transparent, slightly reflective plastic front panel showing realistic material properties — subtle reflections, edge distortion, and thickness at corners. Box interior themed to match the event with miniature accessories, props, and environmental details. Outer box features bold, clean professional lettering with event name, high-quality packaging design with realistic corrugated cardboard textures on visible edges, branded color palette, UPC codes, logos, and feature callouts. Plastic front panel shows soft studio reflections. Lit with clean product photography lighting — soft overhead key, subtle fill from below, and accent lights creating depth on box surfaces. ',
 
-    customStyle: ''
+    customStyle: isReal
+      ? 'Lighting: dramatic, high-contrast directional lighting with a warm key light at 45° sculpting defined highlights across facial planes, complemented by subtle rim lighting tracing the silhouette for dimensional separation. A soft fill light at 20% intensity preserves shadow detail without flattening depth. Background features a smooth, professional gradient with soft atmospheric haze adding cinematic depth. Skin rendering: ultra-detailed microtexture with visible pores, natural sheen on highlighted planes, and subtle subsurface scattering creating lifelike warmth. The overall mood is polished, intentional, and visually striking — crafted to feel premium and print-worthy. '
+      : 'Rendered in a bold, highly detailed artistic style with rich saturated colors, confident linework or brushwork, and strong visual impact. Lighting is dramatic with warm directional key light creating defined highlights and atmospheric shadows. Background features complementary tones with depth and visual interest — gradient colors, environmental details, or thematic elements that enhance the composition without overwhelming the subject. Colors are vibrant and harmonious with intentional contrast between subject and background. The overall aesthetic is polished, expressive, and visually striking — a keepsake-quality artistic portrait with professional production value. '
   };
   return S[style] || '';
 }
@@ -1011,227 +1098,6 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
 }
 
 // ═══════════════════════════════════════
-// REVERSE ENGINEER
-// ═══════════════════════════════════════
-function selectREFilter(btn) {
-  document.querySelectorAll('#reFilterRow .toggle-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  state.reFilter = btn.dataset.val;
-}
-
-function selectREClothing(btn) {
-  document.querySelectorAll('#reClothingRow .toggle-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  state.reClothing = btn.dataset.val;
-}
-
-function handleREUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    const img = document.getElementById('rePreview');
-    img.src = ev.target.result;
-    img.style.display = 'block';
-    state.reImageData = ev.target.result;
-    document.querySelector('#reUploadZone p').innerHTML = '✓ Image loaded — <strong>click Analyze below</strong>';
-  };
-  reader.readAsDataURL(file);
-}
-
-// Drag and drop
-document.addEventListener('DOMContentLoaded', function() {
-  const zone = document.getElementById('reUploadZone');
-  if (zone) {
-    zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.style.borderColor = 'var(--gold)'; });
-    zone.addEventListener('dragleave', function() { zone.style.borderColor = 'var(--dark-border)'; });
-    zone.addEventListener('drop', function(e) {
-      e.preventDefault(); zone.style.borderColor = 'var(--dark-border)';
-      const file = e.dataTransfer.files[0];
-      if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = function(ev) {
-          document.getElementById('rePreview').src = ev.target.result;
-          document.getElementById('rePreview').style.display = 'block';
-          state.reImageData = ev.target.result;
-          document.querySelector('#reUploadZone p').innerHTML = '✓ Image loaded — <strong>click Analyze below</strong>';
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  }
-});
-
-async function reverseEngineer() {
-  if (!state.reImageData) { alert('Please upload an image first'); return; }
-
-  const analyzing = document.getElementById('reAnalyzing');
-  const outputCard = document.getElementById('reOutputCard');
-  analyzing.style.display = 'block';
-  outputCard.classList.remove('visible');
-
-  const filterHint = state.reFilter !== 'unknown' ? `The AI filter used was ${state.reFilter}. ` : '';
-
-  // Clothing instruction based on user selection
-  let clothingInstruction = '';
-  if (state.reClothing === 'neutral') {
-    clothingInstruction = `CRITICAL CLOTHING RULE: Do NOT describe any specific clothing, dress, gown, suit, or outfit in the prompt. Instead, ALWAYS write "Preserve the subject's exact clothing, accessories, and styling precisely as shown in the input photo, rendering every garment detail, fabric texture, fold, and drape in the chosen art style." This makes the prompt work for ANY person regardless of gender or outfit.`;
-  } else if (state.reClothing === 'gendered') {
-    clothingInstruction = `CLOTHING RULE: At the end of the style description, add a gendered wardrobe section: "For female-presenting subjects: [describe elegant feminine attire appropriate to this style with specific fabrics, colors, and details]. For male-presenting subjects: [describe equivalent masculine attire appropriate to this style with specific fabrics, colors, and details]." Make both options match the same style/formality level shown in the image.`;
-  } else {
-    clothingInstruction = `CLOTHING RULE: Describe the exact outfit shown in the image with full detail — specific garment type, color, fabric, construction details, draping, and accessories. This prompt is designed to recreate this specific look.`;
-  }
-
-  // Detect media type from data URL
-  let mediaType = 'image/jpeg';
-  if (state.reImageData.startsWith('data:image/png')) mediaType = 'image/png';
-  else if (state.reImageData.startsWith('data:image/webp')) mediaType = 'image/webp';
-  else if (state.reImageData.startsWith('data:image/gif')) mediaType = 'image/gif';
-
-  const base64Data = state.reImageData.split(',')[1];
-
-  const analysisPrompt = `You are a AI photo booth prompt engineer. Analyze this AI-generated photo booth image and write a prompt that recreates this exact style. ${filterHint}
-
-Your prompts must be extremely specific. Here's the level of detail required:
-
-CARICATURE EXAMPLE: "Turn this photo into a charming, highly detailed, fully colored hand-drawn caricature illustration. This is a complete artistic transformation — not a photo filter or effect. Every element must be fully redrawn. Art Style: Vibrant full-color ink and marker illustration with rich saturated hues and clear crisp lines. Use thick confident black outlines with visible organic hand-drawn pen strokes. All facial features illustrated with pen lines and color — eyes with bold outlines, expressive lashes, clear irises, bright highlights; lips with curved pen strokes; skin with warm tones using cross-hatching, stippling, and color shading. Caricature Proportions: oversized heads approximately 60-70% of total height, tiny simplified bodies 20-30%."
-
-CINEMATIC EXAMPLE: "Lighting: extreme high-contrast cinematic lighting with directional key light at 45° creating sculpted razor-sharp highlights across cheekbones and jawline, warm rim lighting tracing the silhouette along hairline and shoulders. Secondary fill at 15% intensity. Skin: ultra-detailed microtexture with visible pores, natural sheen, subsurface scattering in shadow transitions."
-
-Write a SINGLE complete prompt paragraph (200+ words) ready to paste into your booth software. No headers, no bullet points, no intro. Start directly with "Turn this photo into..." or "Preserve the subject's..." Be extremely specific about techniques, angles, percentages, proportions, materials, and rendering methods.
-
-${clothingInstruction}
-
-After the prompt, on a NEW LINE, write exactly this format (no other text):
----SETTINGS---
-FILTER: [recommend exactly one: Realistic Group, Stylized Single, Pro Realistic Group, Animated / 3D, Realistic Single, Pro Realistic Single, Stylized Group]
-STYLE: [photorealistic, stylized, caricature, 3d, anime, watercolor, or other]
-PEOPLE: [single or group based on what you see]
-POSE: [Random or Keep Original - recommend Random for stylized/caricature, Keep Original for photorealistic]
-RATIO: [Square 1024x1024, Portrait 768x1024, or Landscape 1024x768 based on image orientation]
-
-Filter selection rules:
-- Photorealistic single person → Realistic Single
-- Photorealistic group → Realistic Group
-- Stylized/caricature/watercolor single person → Stylized Single
-- Stylized/caricature/watercolor group → Stylized Group
-- 3D/Pixar/Animated → Animated / 3D
-- If a logo or reference image overlay is visible → use Pro version (Pro Realistic Group or Pro Realistic Single)`;
-
-  try {
-    const response = await fetch("/api/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        system: "",
-        messages: [{
-          role: "user",
-          content: [
-            {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: mediaType,
-                data: base64Data
-              }
-            },
-            {
-              type: "text",
-              text: analysisPrompt
-            }
-          ]
-        }]
-      })
-    });
-
-    if (!response.ok) {
-      const errData = await response.json().catch(() => ({}));
-      throw new Error(errData.error || "API error " + response.status);
-    }
-
-    const data = await response.json();
-    const fullText = data.content
-      .filter(function(item) { return item.type === "text"; })
-      .map(function(item) { return item.text; })
-      .join("\n");
-
-    // Parse out the prompt and settings
-    let promptText = fullText;
-    let settings = {};
-    
-    if (fullText.includes('---SETTINGS---')) {
-      const parts = fullText.split('---SETTINGS---');
-      promptText = parts[0].trim();
-      const settingsBlock = parts[1] || '';
-      
-      const filterMatch = settingsBlock.match(/FILTER:\s*(.+)/i);
-      const styleMatch = settingsBlock.match(/STYLE:\s*(.+)/i);
-      const peopleMatch = settingsBlock.match(/PEOPLE:\s*(.+)/i);
-      const poseMatch = settingsBlock.match(/POSE:\s*(.+)/i);
-      const ratioMatch = settingsBlock.match(/RATIO:\s*(.+)/i);
-      
-      settings.filter = filterMatch ? filterMatch[1].trim() : '';
-      settings.style = styleMatch ? styleMatch[1].trim() : '';
-      settings.people = peopleMatch ? peopleMatch[1].trim() : '';
-      settings.pose = poseMatch ? poseMatch[1].trim() : '';
-      settings.ratio = ratioMatch ? ratioMatch[1].trim() : '';
-    }
-
-    analyzing.style.display = 'none';
-    document.getElementById('rePromptOutput').textContent = promptText;
-
-    let metaHTML = '';
-    if (settings.filter) metaHTML += '<span class="meta-tag">' + settings.filter + '</span>';
-    if (settings.style) metaHTML += '<span class="meta-tag">' + settings.style + '</span>';
-    if (state.reFilter !== 'unknown') metaHTML += '<span class="meta-tag">User: ' + state.reFilter + '</span>';
-    metaHTML += '<span class="meta-tag">Reverse Engineered</span>';
-    document.getElementById('reOutputMeta').innerHTML = metaHTML;
-
-    // Build setup checklist
-    let checklist = '☐ In your booth software: Enable AI Experience → Save Changes<br>';
-    if (settings.filter) {
-      checklist += '☐ Add AI Filter → Select <strong>' + settings.filter + '</strong><br>';
-    }
-    checklist += '☐ Paste the prompt above into the prompt field<br>';
-    if (settings.pose) {
-      checklist += '☐ Set Pose: <strong>' + settings.pose + '</strong><br>';
-    }
-    if (settings.ratio) {
-      checklist += '☐ Set Aspect Ratio: <strong>' + settings.ratio + '</strong> — match to your template<br>';
-    }
-    if (settings.filter && (settings.filter.includes('Pro') || settings.filter.includes('pro'))) {
-      checklist += '☐ Upload reference/logo under Options → Reference Image<br>';
-    }
-    
-    // Credit info
-    const creditMap = {
-      'Realistic Group': 'Standard',
-      'Stylized Single': 'Standard',
-      'Pro Realistic Group': 'Higher',
-      'Animated / 3D': 'Standard',
-      'Realistic Single': '4 credits',
-      'Pro Realistic Single': '5 credits',
-      'Stylized Group': '4 credits'
-    };
-    const credits = settings.filter ? (creditMap[settings.filter] || 'Standard') : 'Standard';
-    checklist += '☐ Assign filter to template → Test render — Credits: <strong>' + credits + '</strong><br>';
-    checklist += '<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing forward, natural smile.';
-    
-    document.getElementById('reTips').innerHTML = checklist;
-
-    outputCard.classList.add('visible');
-    outputCard.scrollIntoView({ behavior: 'smooth' });
-
-  } catch (err) {
-    analyzing.style.display = 'none';
-    console.error('RE Error:', err);
-    alert('Analysis failed: ' + err.message + '\n\nNote: This feature works when viewing the file inside Claude.ai artifacts. If you downloaded the HTML file, the API connection won\'t be available.');
-  }
-}
-
-// ═══════════════════════════════════════
 // COPY FUNCTIONS
 // ═══════════════════════════════════════
 function copyPrompt() {
@@ -1247,14 +1113,6 @@ function copyNeg() {
     const btn = event.target;
     btn.textContent = '✓ Copied!';
     setTimeout(() => { btn.textContent = 'Copy Negative Prompt'; }, 2000);
-  });
-}
-
-function copyREPrompt() {
-  navigator.clipboard.writeText(document.getElementById('rePromptOutput').textContent).then(() => {
-    const btn = document.getElementById('reCopyBtn');
-    btn.textContent = '✓ Copied!'; btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'Copy Prompt'; btn.classList.remove('copied'); }, 2000);
   });
 }
 </script>
