@@ -29,7 +29,7 @@ export default async function handler(req, res) {
             email_address: email,
             status: 'subscribed',
             merge_fields: { FNAME: name || '' },
-            tags: ['prompt-engine', 'expo-2025']
+            tags: ['prompt-engine']
           })
         }
       );
