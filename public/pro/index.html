@@ -1026,15 +1026,15 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
 
   // Checklist
   const CC = { bananaFXReal:'Standard', bananaFXStyled:'Standard', bananaFXPro:'Higher', bananaFXAnimated:'Standard', personaFXReal:'4 credits', personaFXProReal:'5 credits', personaFXStyled:'4 credits', classicFXGroupReal:'Standard', classicFXGroupStyled:'Standard' };
-  let list = `☐ In Snappic: Features tab → Enable AI Experience → Save Changes<br>`;
-  list += `☐ Add AI Filter → Select <strong>${FN[filter]||filter}</strong><br>`;
+  let list = `☐ In your booth software: Enable AI filters / AI Experience → Save<br>`;
+  list += `☐ Add an AI filter — <strong>Snappic users: select ${FN[filter]||filter}</strong><br>`;
   list += `☐ Paste prompt into the prompt field<br>`;
   list += `☐ Set Pose: <strong>${pose==='random'?'Random (recommended)':'Keep Original'}</strong><br>`;
   list += `☐ Set Aspect Ratio: <strong>${ratio}</strong> — must match your template frame orientation<br>`;
-  if (hasSurvey) { list += `☐ Enable Survey → click survey field above prompt box to insert [What is your name?]<br>`; }
-  if (hasLogo && (filter==='bananaFXPro'||filter==='personaFXProReal')) { list += `☐ Upload reference/logo under Options → Reference Image<br>`; }
-  else if (hasLogo) { list += `⚠️ Reference image upload requires BananaFX Pro Real or PersonaFX Pro Real<br>`; }
-  list += `☐ Assign filter to template → Test with 2–3 different faces — Credits: <strong>${CC[filter]||'Standard'}</strong><br>`;
+  if (hasSurvey) { list += `☐ Enable Survey → insert guest name field into prompt: [What is your name?]<br>`; }
+  if (hasLogo && (filter==='bananaFXPro'||filter==='personaFXProReal')) { list += `☐ Upload reference/logo image (Snappic: Options → Reference Image)<br>`; }
+  else if (hasLogo) { list += `⚠️ Reference image upload requires a Pro-tier AI filter (Snappic: BananaFX Pro Real or PersonaFX Pro Real)<br>`; }
+  list += `☐ Assign filter to template → Test with 2–3 different faces<br>`;
   list += `<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing camera, natural smile, no wild poses.`;
   document.getElementById('tipsContent').innerHTML = list;
 
@@ -1123,47 +1123,69 @@ async function reverseEngineer() {
 
   const base64Data = state.reImageData.split(',')[1];
 
-  const analysisPrompt = `You are an expert AI photo booth prompt engineer for Snappic photo booth software. Your job is to analyze this AI-generated photo booth image and write a prompt that recreates this exact style — ready to paste directly into Snappic's BananaFX prompt field.
+  const analysisPrompt = `You are an expert AI photo booth prompt engineer. Your job is to analyze this AI-generated photo booth image and write a prompt that, when given to an AI model with a new guest photo, will produce an output that looks EXACTLY like this image's style, technique, and aesthetic.
 
 ${filterHint}
 
-CRITICAL CONTEXT: Snappic uses BananaFX filters powered by Google Gemini 2.5. The prompt transforms a guest's INPUT PHOTO taken at the booth into an AI-generated image.
+CRITICAL CONTEXT: This prompt transforms a guest's INPUT PHOTO taken at a booth into an AI-generated image. The prompt must be so specific that the AI output is visually indistinguishable from the uploaded reference image in terms of art style, technique, color palette, background treatment, and rendering approach.
 
 RULES:
 1. Write the ENTIRE prompt as a SINGLE continuous paragraph — no headers, no bullets, no line breaks
-2. Be extremely specific about art technique, colors, lighting, rendering, and composition
-3. Write 200+ words minimum
-4. The prompt must work when pasted into Snappic's AI filter prompt field
+2. Your prompt must be a TECHNICAL RECREATION GUIDE, not an artistic description. Describe HOW to render, not how it FEELS.
+3. Write 250+ words minimum
+4. Study the image closely: What exact art technique is used? What specific colors appear? How are faces rendered? How is hair rendered? What does the background look like? Are there drips, splatters, bleeds? How much white space? What's the composition?
 
-MANDATORY PROMPT STRUCTURE (follow this order):
+MANDATORY PROMPT STRUCTURE:
 
 BLOCK 1 - SUBJECT PRESERVATION (always first):
-For photorealistic (BananaFX Real): Start with a short scene opener, then include: "CRITICAL REQUIREMENT - DO NOT MODIFY APPEARANCE: The subject's EXACT facial features, bone structure, eye shape, eye color, nose shape, lip shape, skin tone, hair color, hair texture, hair style, and hair length MUST remain completely unchanged and 100% true to the original image. DO NOT alter, modify, change, or deviate from the subject's original appearance in ANY way."
-For stylized (BananaFX Styled): "Preserve the precise number of subjects, their relative positions, body poses, head orientations, gaze directions, facial expressions, smiles, hairstyles, clothing details, and any accessories exactly as captured, without altering or idealizing any aspect."
-For groups: Add position/pose preservation language for multiple subjects.
+For photorealistic: "CRITICAL REQUIREMENT — DO NOT MODIFY APPEARANCE: The subject's EXACT facial features, bone structure, eye shape, eye color, nose shape, lip shape, skin tone, hair color, hair texture, hair style, and hair length MUST remain completely unchanged and 100% true to the original image."
+For stylized: "Preserve the precise number of subjects, their relative positions, body poses, head orientations, gaze directions, facial expressions, smiles, hairstyles, clothing details, and any accessories exactly as captured, without altering or idealizing any aspect."
 
-BLOCK 2 - TRANSFORMATION + DETAILED STYLE (this is the bulk — 150+ words):
-Describe the complete transformation. Be specific about:
-- For photorealistic: scene setting, wardrobe details (include "For female looks:" and "For male looks:" options if the image shows gendered styling), background environment, atmospheric elements, lighting setup, color grading, camera/lens specs
-- For stylized/illustrated: art technique (watercolor washes, ink contours, brush strokes, color application), color palette (name specific colors), how faces/skin/hair are rendered in the style, background treatment, composition approach
-- For caricature: illustration technique, proportions, line work style, color method
+BLOCK 2 - TRANSFORMATION + DETAILED STYLE (this is the bulk — 200+ words):
+This block must be so specific that someone reading it could recreate this exact style without ever seeing the image. Include ALL of these:
+
+For watercolor/illustrated styles, specify:
+- Exact art technique: ink contours? watercolor washes? wet-on-wet? layered translucent washes? visible brush strokes?
+- Face rendering: how are eyes, smile, cheeks rendered? Rosy cheeks? Clean line work? Watercolor skin tones?
+- Hair rendering: flowing strokes? dark washes? highlights showing through?
+- Clothing rendering: watercolor washes for fabric? fold lines? how much detail?
+- Background: what colors exactly? (blush pink, warm peach, champagne, etc.) Watercolor blooms? Bleeds?
+- Special effects: drips? splatters? droplets? How many and where?
+- White space: how much of the image is white paper? Where does the illustration sit?
+- What it should NOT look like: digital rendering? photorealistic skin? sharp edges?
+
+EXAMPLE of a GOOD watercolor prompt (for reference quality level):
+"Transform into a whimsical, full-length watercolor illustration utilizing loose, flowing watercolor techniques with layered translucent washes, visible brush strokes, and soft bleeding edges. Paint skin with warm, natural tones and subtle rosy cheeks, rendering faces with clean, minimal line work for expressive eyes and warm genuine smiles. Depict clothing with elegant watercolor washes that capture fabric texture and folds through soft color layering. Use a light, creamy background with gentle watercolor bleeds and washes. Surround with subtle watercolor botanical elements in muted greens and creams."
+
+For photorealistic styles, specify:
+- Scene/environment in detail
+- Wardrobe: "For female looks:" and "For male looks:" with specific fabrics, colors, accessories
+- Lighting: key light angle, rim light, fill percentages, color temperature
+- Background: gradient colors, bokeh, atmospheric effects
+- Skin rendering: pore detail, natural sheen, subsurface scattering
+- Camera specs: lens, f-stop, depth of field
+
+EXAMPLE of a GOOD photorealistic prompt (for reference quality level):
+"Editorial portrait photograph of a joyful person in celebratory moment, genuine bright smile. CRITICAL REQUIREMENT — DO NOT MODIFY APPEARANCE: [preservation block]. Subject wearing [detailed wardrobe]. Background is [detailed scene with specific elements, people, activity]. Moody atmospheric lighting with subtle washes of [colors], dim Edison bulbs casting amber light. Shot on medium format camera, shallow depth of field, warm color grading with rich jewel tones. Negative prompt: altered faces, altered hair, beauty filters, AI artifacts."
 
 ${clothingInstruction}
 
-BLOCK 3 - QUALITY CLOSER + NEGATIVE PROMPT:
-End with mood/quality statement. For photorealistic, also include "Negative prompt:" followed by things to avoid (e.g. "altered faces, altered hair, beauty filters, stylized skin, extra fingers, distorted hands, AI artifacts").
+BLOCK 3 - QUALITY CLOSER:
+End with resolution and quality statement. For photorealistic, include "Negative prompt:" section.
 
-NOW: Analyze the uploaded image and write the complete prompt following this exact structure. Output ONLY the prompt paragraph — no intro, no explanation.
+YOUR OUTPUT must match the quality and specificity of these examples. Do NOT write vague descriptions like "elegant aesthetic" or "sophisticated feel." Write TECHNICAL INSTRUCTIONS that tell the AI exactly what to render.
+
+NOW: Analyze the uploaded image and write the complete prompt. Output ONLY the prompt paragraph — no intro, no explanation.
 
 After the prompt, on a NEW LINE, write exactly this format:
 ---SETTINGS---
-FILTER: [recommend exactly one: BananaFX Real, BananaFX Styled, BananaFX Pro Real, PersonaFX Real, PersonaFX Styled, PersonaFX Pro Real, ClassicFX Group Real, ClassicFX Group Styled]
+FILTER: [recommend the best Snappic filter: BananaFX Real, BananaFX Styled, BananaFX Pro Real, PersonaFX Real, PersonaFX Styled, PersonaFX Pro Real, ClassicFX Group Real, ClassicFX Group Styled]
 STYLE: [photorealistic, stylized, caricature, 3d, anime, watercolor, or other]
 PEOPLE: [single or group based on what you see]
 POSE: [Random or Keep Original — Random recommended for stylized, either works for photorealistic]
 RATIO: [3:4, 9:16, 4:3, 16:9, or 1:1 — match the image orientation. Portrait=3:4 or 9:16, Landscape=4:3 or 16:9, Square=1:1]
 
-Filter selection rules (use EXACT Snappic filter names):
+Snappic filter selection rules:
 - Photorealistic single person (1–3 people) → BananaFX Real (fastest) or PersonaFX Real
 - Photorealistic with reference image/branding → BananaFX Pro Real or PersonaFX Pro Real
 - Stylized/watercolor/illustration single person → BananaFX Styled
@@ -1245,19 +1267,19 @@ Filter selection rules (use EXACT Snappic filter names):
     document.getElementById('reOutputMeta').innerHTML = metaHTML;
 
     // Build setup checklist
-    let checklist = '☐ In your booth software: Enable AI Experience → Save Changes<br>';
+    let checklist = '☐ In your booth software: Enable AI filters / AI Experience → Save<br>';
     if (settings.filter) {
-      checklist += '☐ Add AI Filter → Select <strong>' + settings.filter + '</strong><br>';
+      checklist += '☐ Add an AI filter — <strong>Snappic users: select ' + settings.filter + '</strong><br>';
     }
     checklist += '☐ Paste the prompt above into the prompt field<br>';
     if (settings.pose) {
       checklist += '☐ Set Pose: <strong>' + settings.pose + '</strong><br>';
     }
     if (settings.ratio) {
-      checklist += '☐ Set Aspect Ratio: <strong>' + settings.ratio + '</strong> — match to your template<br>';
+      checklist += '☐ Set Aspect Ratio: <strong>' + settings.ratio + '</strong> — must match your template frame orientation<br>';
     }
     if (settings.filter && (settings.filter.includes('Pro') || settings.filter.includes('pro'))) {
-      checklist += '☐ Upload reference/logo under Options → Reference Image<br>';
+      checklist += '☐ Upload reference/logo image (Snappic: Options → Reference Image)<br>';
     }
     
     // Credit info
@@ -1272,9 +1294,8 @@ Filter selection rules (use EXACT Snappic filter names):
       'ClassicFX Group Real': 'Standard',
       'ClassicFX Group Styled': 'Standard'
     };
-    const credits = settings.filter ? (creditMap[settings.filter] || 'Standard') : 'Standard';
-    checklist += '☐ Assign filter to template → Test render — Credits: <strong>' + credits + '</strong><br>';
-    checklist += '<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing forward, natural smile.';
+    checklist += '☐ Assign filter to template → Test with 2–3 different faces<br>';
+    checklist += '<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing camera, natural smile, no wild poses.';
     
     document.getElementById('reTips').innerHTML = checklist;
 
