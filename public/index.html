@@ -1121,15 +1121,15 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
 
   // Checklist
   const CC = { bananaFXReal:'Standard', bananaFXStyled:'Standard', bananaFXPro:'Higher', bananaFXAnimated:'Standard', personaFXReal:'4 credits', personaFXProReal:'5 credits', personaFXStyled:'4 credits', classicFXGroupReal:'Standard', classicFXGroupStyled:'Standard' };
-  let list = `☐ In Snappic: Features tab → Enable AI Experience → Save Changes<br>`;
-  list += `☐ Add AI Filter → Select <strong>${FN[filter]||filter}</strong><br>`;
+  let list = `☐ In your booth software: Enable AI filters / AI Experience → Save<br>`;
+  list += `☐ Add an AI filter — <strong>Snappic users: select ${FN[filter]||filter}</strong><br>`;
   list += `☐ Paste prompt into the prompt field<br>`;
   list += `☐ Set Pose: <strong>${pose==='random'?'Random (recommended)':'Keep Original'}</strong><br>`;
   list += `☐ Set Aspect Ratio: <strong>${ratio}</strong> — must match your template frame orientation<br>`;
-  if (hasSurvey) { list += `☐ Enable Survey → click survey field above prompt box to insert [What is your name?]<br>`; }
-  if (hasLogo && (filter==='bananaFXPro'||filter==='personaFXProReal')) { list += `☐ Upload reference/logo under Options → Reference Image<br>`; }
-  else if (hasLogo) { list += `⚠️ Reference image upload requires BananaFX Pro Real or PersonaFX Pro Real<br>`; }
-  list += `☐ Assign filter to template → Test with 2–3 different faces — Credits: <strong>${CC[filter]||'Standard'}</strong><br>`;
+  if (hasSurvey) { list += `☐ Enable Survey → insert guest name field into prompt: [What is your name?]<br>`; }
+  if (hasLogo && (filter==='bananaFXPro'||filter==='personaFXProReal')) { list += `☐ Upload reference/logo image (Snappic: Options → Reference Image)<br>`; }
+  else if (hasLogo) { list += `⚠️ Reference image upload requires a Pro-tier AI filter (Snappic: BananaFX Pro Real or PersonaFX Pro Real)<br>`; }
+  list += `☐ Assign filter to template → Test with 2–3 different faces<br>`;
   list += `<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing camera, natural smile, no wild poses.`;
   document.getElementById('tipsContent').innerHTML = list;
 
