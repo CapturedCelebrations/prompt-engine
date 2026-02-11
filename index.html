@@ -1119,14 +1119,13 @@ Filter selection rules:
 - If a logo or reference image overlay is visible → use Pro version (Pro Realistic Group or Pro Realistic Single)`;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
+    const response = await fetch("/api/analyze", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
-        max_tokens: 2000,
+        system: "",
         messages: [{
           role: "user",
           content: [
@@ -1148,8 +1147,8 @@ Filter selection rules:
     });
 
     if (!response.ok) {
-      const errBody = await response.text();
-      throw new Error("API " + response.status + ": " + errBody.substring(0, 200));
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || "API error " + response.status);
     }
 
     const data = await response.json();
