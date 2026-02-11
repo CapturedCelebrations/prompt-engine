@@ -338,12 +338,15 @@ textarea::placeholder { color: var(--text-muted); }
 
       <div style="margin-top: 16px;">
         <div class="card-label" style="margin-bottom: 10px;">What filter was used? (if you know)</div>
-        <div class="toggle-row" id="reFilterRow">
+        <div class="toggle-row" id="reFilterRow" style="flex-wrap:wrap;gap:8px;">
           <button class="toggle-chip active" onclick="selectREFilter(this)" data-val="unknown">Not sure</button>
-          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXStyled">Stylized Single</button>
-          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXReal">Realistic Group</button>
-          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="personaFXStyled">Stylized Group</button>
-          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="personaFXReal">Realistic Single</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXStyled">BananaFX Styled</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXReal">BananaFX Real</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="bananaFXPro">BananaFX Pro Real</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="personaFXStyled">PersonaFX Styled</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="personaFXReal">PersonaFX Real</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="classicFXGroupReal">ClassicFX Group Real</button>
+          <button class="toggle-chip" onclick="selectREFilter(this)" data-val="classicFXGroupStyled">ClassicFX Group Styled</button>
         </div>
       </div>
 
@@ -536,9 +539,11 @@ textarea::placeholder { color: var(--text-muted); }
       <div style="flex: 1; min-width: 160px;">
         <div class="card-label" style="margin-bottom: 10px;">Aspect Ratio</div>
         <div class="toggle-row">
-          <button class="toggle-chip active" onclick="selectRatio(this)" data-ratio="Square (1024×1024)">Square</button>
-          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="Portrait (1024×1536)">Portrait</button>
-          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="Landscape (1536×1024)">Landscape</button>
+          <button class="toggle-chip active" onclick="selectRatio(this)" data-ratio="1:1 (Square)">Square 1:1</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="3:4 (Portrait)">Portrait 3:4</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="9:16 (Portrait Tall)">Tall 9:16</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="4:3 (Landscape)">Landscape 4:3</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="16:9 (Landscape Wide)">Wide 16:9</button>
         </div>
       </div>
     </div>
@@ -572,7 +577,7 @@ textarea::placeholder { color: var(--text-muted); }
   <!-- Footer -->
   <div class="site-footer">
     <div class="footer-contact">
-      <a href="mailto:info@capturedcelebrations.com">info@capturedcelebrations.com</a> · <a href="tel:7478954473">(747) 895-4473</a><br>
+      <a href="/cdn-cgi/l/email-protection#eb82858d84ab888a9b9f9e998e8f888e878e89998a9f82848598c5888486"><span class="__cf_email__" data-cfemail="ec85828a83ac8f8d9c98999e89888f8980898e9e8d988583829fc28f8381">[email&#160;protected]</span></a> · <a href="tel:7478954473">(747) 895-4473</a><br>
       <a href="https://www.capturedcelebrations.com" target="_blank">capturedcelebrations.com</a>
     </div>
     <div class="footer-legal">
@@ -583,14 +588,14 @@ textarea::placeholder { color: var(--text-muted); }
 
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
 const state = {
   filter: '', theme: '', style: '',
   modifiers: new Set(), pose: 'random',
-  ratio: 'Square (1024×1024)',
+  ratio: '1:1 (Square)',
   people: '', look: '', refImage: '',
   reFilter: 'unknown', reImageData: null, reClothing: 'neutral'
 };
@@ -642,39 +647,43 @@ function autoSelectFilter() {
     if (refImage === 'yes') {
       if (people === '1') {
         filter = 'personaFXProReal';
-        why = 'Single person + photorealistic + reference image. Best prompt adherence and branding control.';
+        why = 'PersonaFX Pro Real — single person photorealistic with reference image upload for branding control. 5 credits/render.';
       } else {
         filter = 'bananaFXPro';
-        why = 'Groups + photorealistic + reference image. Best quality for group shots with branding.';
+        why = 'BananaFX Pro Real — group photorealistic with reference image upload. Best branding control for groups.';
       }
     } else {
       if (people === '1') {
-        filter = 'personaFXReal';
-        why = 'Single person photorealistic with excellent text handling and prompt adherence. 4 credits/test.';
-      } else {
         filter = 'bananaFXReal';
-        why = 'Best filter for realistic group photos. Fast rendering keeps your booth line moving.';
+        why = 'BananaFX Real — fastest photorealistic filter. Works great for 1–3 people. Powered by Gemini 2.5.';
+      } else if (people === '2-3') {
+        filter = 'bananaFXReal';
+        why = 'BananaFX Real — fast rendering, works well with 1–3 people. Best for keeping your booth line moving.';
+      } else {
+        filter = 'classicFXGroupReal';
+        why = 'ClassicFX Group Real — built specifically for larger group photos. More consistent results with 4+ people.';
       }
     }
   } else {
     if (refImage === 'yes') {
       filter = 'personaFXProReal';
-      why = 'Reference image + stylized prompt gives you the most creative control. 5 credits/test.';
+      why = 'PersonaFX Pro Real — reference image + stylized prompt for maximum creative control. 5 credits/render.';
     } else {
       if (people === '1') {
         filter = 'bananaFXStyled';
-        why = 'Best for single-person stylized looks. Fast rendering, strong artistic output.';
+        why = 'BananaFX Styled — best for single-person stylized looks (Pixar, watercolor, illustration). Fast rendering.';
       } else {
         filter = 'personaFXStyled';
-        why = 'Best stylized filter for groups up to 3. Better prompt adherence for groups. 4 credits/test.';
+        why = 'PersonaFX Styled — recommended over BananaFX Styled for group stylized imagery. Better consistency across multiple subjects.';
       }
     }
   }
 
   const filterNames = {
-    bananaFXReal: 'Realistic Group', bananaFXStyled: 'Stylized Single',
-    bananaFXPro: 'Pro Realistic Group', personaFXReal: 'Realistic Single',
-    personaFXProReal: 'Pro Realistic Single', personaFXStyled: 'Stylized Group'
+    bananaFXReal: 'BananaFX Real', bananaFXStyled: 'BananaFX Styled',
+    bananaFXPro: 'BananaFX Pro Real', personaFXReal: 'PersonaFX Real',
+    personaFXProReal: 'PersonaFX Pro Real', personaFXStyled: 'PersonaFX Styled',
+    classicFXGroupReal: 'ClassicFX Group Real', classicFXGroupStyled: 'ClassicFX Group Styled'
   };
 
   state.filter = filter;
@@ -742,8 +751,8 @@ function generatePrompt() {
   if (!style) { alert('Please select a style direction (Step 3)'); return; }
 
   let prompt = '';
-  const isReal = ['bananaFXReal','bananaFXPro','personaFXReal','personaFXProReal'].includes(filter);
-  const isStyled = ['bananaFXStyled','personaFXStyled','bananaFXAnimated'].includes(filter);
+  const isReal = ['bananaFXReal','bananaFXPro','personaFXReal','personaFXProReal','classicFXGroupReal'].includes(filter);
+  const isStyled = ['bananaFXStyled','personaFXStyled','bananaFXAnimated','classicFXGroupStyled'].includes(filter);
   const isBanana = filter.startsWith('banana');
   const isPersona = filter.startsWith('persona');
   const isGroup = state.people === '2-3' || state.people === '4+';
@@ -760,9 +769,9 @@ function generatePrompt() {
     prompt += 'Turn this photo into a charming, highly detailed, fully colored hand-drawn caricature illustration. This is a complete artistic transformation — not a photo filter or effect. Every element including the subject\'s face, skin, eyes, lips, hair, clothing, and body must be fully redrawn in a playful, expressive caricature sketch style. ';
   } else if (isReal) {
     if (isGroup) {
-      prompt += 'Preserve the precise number of subjects, their relative positions, body poses, head orientations, gaze directions, facial expressions, smiles, hairstyles, clothing details, and any accessories exactly as captured, without altering or idealizing any aspect. ';
+      prompt += 'Use only the uploaded people as the main subjects. Preserve each subject\'s face and hair exactly as uploaded — facial structure, proportions, age, skin texture, hairline, hairstyle, length, color, parting, and volume must remain unchanged. No hair restyling, recoloring, thickening, thinning, or smoothing. No facial alteration, beautification, stylization, or exaggeration. Maintain true-to-life, hyper-realistic skin texture, pores, fine lines, and natural lighting response. ';
     } else {
-      prompt += 'Preserve the exact facial features, bone structure, skin tone, hairstyle, gaze direction, and facial expression of the subject with absolutely no alterations. ';
+      prompt += 'CRITICAL REQUIREMENT — DO NOT MODIFY APPEARANCE: The subject\'s EXACT facial features, bone structure, eye shape, eye color, nose shape, lip shape, skin tone, hair color, hair texture, hair style, and hair length MUST remain completely unchanged and 100% true to the original image. DO NOT alter, modify, change, or deviate from the subject\'s original appearance in ANY way. Keep every facial feature and hair characteristic precisely as they appear in the source image. This is the highest priority instruction. ';
     }
   } else if (isStyled) {
     if (isGroup) {
@@ -991,7 +1000,7 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
   const s = { cinematic:'Cinematic', watercolor:'Watercolor', luxury:'Luxury', fantasy:'Fantasy', retro:'Retro', pixar:'Pixar 3D', bw:'B&W', anime:'Anime', collectible:'Collectible', caricature:'Caricature', customStyle:'Custom' };
   document.getElementById('promptTitle').textContent = `${t[state.theme]||'Custom'} — ${s[style]||'Custom'} Portrait`;
 
-  const FN = { bananaFXReal:'Realistic Group', bananaFXStyled:'Stylized Single', bananaFXPro:'Pro Realistic Group', bananaFXAnimated:'Animated / 3D', personaFXReal:'Realistic Single', personaFXProReal:'Pro Realistic Single', personaFXStyled:'Stylized Group' };
+  const FN = { bananaFXReal:'BananaFX Real', bananaFXStyled:'BananaFX Styled', bananaFXPro:'BananaFX Pro Real', bananaFXAnimated:'BananaFX Animated', personaFXReal:'PersonaFX Real', personaFXProReal:'PersonaFX Pro Real', personaFXStyled:'PersonaFX Styled', classicFXGroupReal:'ClassicFX Group Real', classicFXGroupStyled:'ClassicFX Group Styled' };
 
   document.getElementById('outputMeta').innerHTML = `
     <span class="meta-tag">${FN[filter]||filter}</span>
@@ -1004,8 +1013,8 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
 
   const negSection = document.getElementById('negSection');
   if (hasNeg) {
-    let neg = 'blurry, low quality, pixelated, distorted faces, extra limbs, extra fingers, deformed hands, watermark, text overlay (unless specified), cropped composition, oversaturated, noisy, grainy';
-    if (isReal) neg += ', cartoon, anime, illustration, painting style, unrealistic skin, plastic skin, mannequin-like';
+    let neg = 'blurry, low quality, pixelated, distorted faces, extra limbs, extra fingers, deformed hands, watermark, text overlay (unless specified), cropped composition, oversaturated, noisy';
+    if (isReal) neg += ', CHANGING FACE, ALTERING HAIR, DIFFERENT HAIRSTYLE, MODIFIED FACIAL FEATURES, different hair color, different hair length, different eye color, altered bone structure, changed appearance, cartoon, anime, illustration, painting style, unrealistic skin, plastic skin, mannequin-like, AI artifacts, beauty filters, stylized skin, face swapping, hair smoothing, hair recoloring';
     if (isStyled && style !== 'bw') neg += ', photorealistic, dull colors, flat lighting';
     if (style === 'watercolor') neg += ', photorealistic, hard edges, digital rendering, vector art, sharp outlines';
     if (style === 'caricature') neg += ', photorealistic, photo filter effect, smooth digital rendering, 3D render, plastic look, generic clip-art style';
@@ -1016,17 +1025,17 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
   } else { negSection.style.display = 'none'; }
 
   // Checklist
-  const CC = { bananaFXReal:'Standard', bananaFXStyled:'Standard', bananaFXPro:'Higher', bananaFXAnimated:'Standard', personaFXReal:'4 credits', personaFXProReal:'5 credits', personaFXStyled:'4 credits' };
-  let list = `☐ In your booth software: Enable AI Experience → Save Changes<br>`;
+  const CC = { bananaFXReal:'Standard', bananaFXStyled:'Standard', bananaFXPro:'Higher', bananaFXAnimated:'Standard', personaFXReal:'4 credits', personaFXProReal:'5 credits', personaFXStyled:'4 credits', classicFXGroupReal:'Standard', classicFXGroupStyled:'Standard' };
+  let list = `☐ In Snappic: Features tab → Enable AI Experience → Save Changes<br>`;
   list += `☐ Add AI Filter → Select <strong>${FN[filter]||filter}</strong><br>`;
   list += `☐ Paste prompt into the prompt field<br>`;
   list += `☐ Set Pose: <strong>${pose==='random'?'Random (recommended)':'Keep Original'}</strong><br>`;
-  list += `☐ Set Aspect Ratio: <strong>${ratio}</strong> — match to your template<br>`;
-  if (hasSurvey) { list += `☐ Enable Surveys → insert [What is your name?]<br>`; }
+  list += `☐ Set Aspect Ratio: <strong>${ratio}</strong> — must match your template frame orientation<br>`;
+  if (hasSurvey) { list += `☐ Enable Survey → click survey field above prompt box to insert [What is your name?]<br>`; }
   if (hasLogo && (filter==='bananaFXPro'||filter==='personaFXProReal')) { list += `☐ Upload reference/logo under Options → Reference Image<br>`; }
-  else if (hasLogo) { list += `⚠️ Logo upload requires a Pro-tier AI filter<br>`; }
-  list += `☐ Assign filter to template → Test render — Credits: <strong>${CC[filter]||'Standard'}</strong><br>`;
-  list += `<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing forward, natural smile.`;
+  else if (hasLogo) { list += `⚠️ Reference image upload requires BananaFX Pro Real or PersonaFX Pro Real<br>`; }
+  list += `☐ Assign filter to template → Test with 2–3 different faces — Credits: <strong>${CC[filter]||'Standard'}</strong><br>`;
+  list += `<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing camera, natural smile, no wild poses.`;
   document.getElementById('tipsContent').innerHTML = list;
 
   outputCard.classList.add('visible');
@@ -1114,33 +1123,55 @@ async function reverseEngineer() {
 
   const base64Data = state.reImageData.split(',')[1];
 
-  const analysisPrompt = `You are a AI photo booth prompt engineer. Analyze this AI-generated photo booth image and write a prompt that recreates this exact style. ${filterHint}
+  const analysisPrompt = `You are an expert AI photo booth prompt engineer for Snappic photo booth software. Your job is to analyze this AI-generated photo booth image and write a prompt that recreates this exact style — ready to paste directly into Snappic's BananaFX prompt field.
 
-Your prompts must be extremely specific. Here's the level of detail required:
+${filterHint}
 
-CARICATURE EXAMPLE: "Turn this photo into a charming, highly detailed, fully colored hand-drawn caricature illustration. This is a complete artistic transformation — not a photo filter or effect. Every element must be fully redrawn. Art Style: Vibrant full-color ink and marker illustration with rich saturated hues and clear crisp lines. Use thick confident black outlines with visible organic hand-drawn pen strokes. All facial features illustrated with pen lines and color — eyes with bold outlines, expressive lashes, clear irises, bright highlights; lips with curved pen strokes; skin with warm tones using cross-hatching, stippling, and color shading. Caricature Proportions: oversized heads approximately 60-70% of total height, tiny simplified bodies 20-30%."
+CRITICAL CONTEXT: Snappic uses BananaFX filters powered by Google Gemini 2.5. The prompt transforms a guest's INPUT PHOTO taken at the booth into an AI-generated image.
 
-CINEMATIC EXAMPLE: "Lighting: extreme high-contrast cinematic lighting with directional key light at 45° creating sculpted razor-sharp highlights across cheekbones and jawline, warm rim lighting tracing the silhouette along hairline and shoulders. Secondary fill at 15% intensity. Skin: ultra-detailed microtexture with visible pores, natural sheen, subsurface scattering in shadow transitions."
+RULES:
+1. Write the ENTIRE prompt as a SINGLE continuous paragraph — no headers, no bullets, no line breaks
+2. Be extremely specific about art technique, colors, lighting, rendering, and composition
+3. Write 200+ words minimum
+4. The prompt must work when pasted into Snappic's AI filter prompt field
 
-Write a SINGLE complete prompt paragraph (200+ words) ready to paste into your booth software. No headers, no bullet points, no intro. Start directly with "Turn this photo into..." or "Preserve the subject's..." Be extremely specific about techniques, angles, percentages, proportions, materials, and rendering methods.
+MANDATORY PROMPT STRUCTURE (follow this order):
+
+BLOCK 1 - SUBJECT PRESERVATION (always first):
+For photorealistic (BananaFX Real): Start with a short scene opener, then include: "CRITICAL REQUIREMENT - DO NOT MODIFY APPEARANCE: The subject's EXACT facial features, bone structure, eye shape, eye color, nose shape, lip shape, skin tone, hair color, hair texture, hair style, and hair length MUST remain completely unchanged and 100% true to the original image. DO NOT alter, modify, change, or deviate from the subject's original appearance in ANY way."
+For stylized (BananaFX Styled): "Preserve the precise number of subjects, their relative positions, body poses, head orientations, gaze directions, facial expressions, smiles, hairstyles, clothing details, and any accessories exactly as captured, without altering or idealizing any aspect."
+For groups: Add position/pose preservation language for multiple subjects.
+
+BLOCK 2 - TRANSFORMATION + DETAILED STYLE (this is the bulk — 150+ words):
+Describe the complete transformation. Be specific about:
+- For photorealistic: scene setting, wardrobe details (include "For female looks:" and "For male looks:" options if the image shows gendered styling), background environment, atmospheric elements, lighting setup, color grading, camera/lens specs
+- For stylized/illustrated: art technique (watercolor washes, ink contours, brush strokes, color application), color palette (name specific colors), how faces/skin/hair are rendered in the style, background treatment, composition approach
+- For caricature: illustration technique, proportions, line work style, color method
 
 ${clothingInstruction}
 
-After the prompt, on a NEW LINE, write exactly this format (no other text):
+BLOCK 3 - QUALITY CLOSER + NEGATIVE PROMPT:
+End with mood/quality statement. For photorealistic, also include "Negative prompt:" followed by things to avoid (e.g. "altered faces, altered hair, beauty filters, stylized skin, extra fingers, distorted hands, AI artifacts").
+
+NOW: Analyze the uploaded image and write the complete prompt following this exact structure. Output ONLY the prompt paragraph — no intro, no explanation.
+
+After the prompt, on a NEW LINE, write exactly this format:
 ---SETTINGS---
-FILTER: [recommend exactly one: Realistic Group, Stylized Single, Pro Realistic Group, Animated / 3D, Realistic Single, Pro Realistic Single, Stylized Group]
+FILTER: [recommend exactly one: BananaFX Real, BananaFX Styled, BananaFX Pro Real, PersonaFX Real, PersonaFX Styled, PersonaFX Pro Real, ClassicFX Group Real, ClassicFX Group Styled]
 STYLE: [photorealistic, stylized, caricature, 3d, anime, watercolor, or other]
 PEOPLE: [single or group based on what you see]
-POSE: [Random or Keep Original - recommend Random for stylized/caricature, Keep Original for photorealistic]
-RATIO: [Square 1024x1024, Portrait 768x1024, or Landscape 1024x768 based on image orientation]
+POSE: [Random or Keep Original — Random recommended for stylized, either works for photorealistic]
+RATIO: [3:4, 9:16, 4:3, 16:9, or 1:1 — match the image orientation. Portrait=3:4 or 9:16, Landscape=4:3 or 16:9, Square=1:1]
 
-Filter selection rules:
-- Photorealistic single person → Realistic Single
-- Photorealistic group → Realistic Group
-- Stylized/caricature/watercolor single person → Stylized Single
-- Stylized/caricature/watercolor group → Stylized Group
-- 3D/Pixar/Animated → Animated / 3D
-- If a logo or reference image overlay is visible → use Pro version (Pro Realistic Group or Pro Realistic Single)`;
+Filter selection rules (use EXACT Snappic filter names):
+- Photorealistic single person (1–3 people) → BananaFX Real (fastest) or PersonaFX Real
+- Photorealistic with reference image/branding → BananaFX Pro Real or PersonaFX Pro Real
+- Stylized/watercolor/illustration single person → BananaFX Styled
+- Stylized/illustrated group → PersonaFX Styled (NOT BananaFX Styled for groups)
+- Photorealistic large group (4+) → ClassicFX Group Real
+- Stylized large group (4+) → ClassicFX Group Styled
+- 3D/Pixar-style single → BananaFX Styled
+- Caricature single → BananaFX Styled`;
 
   try {
     const response = await fetch("/api/analyze", {
@@ -1231,13 +1262,15 @@ Filter selection rules:
     
     // Credit info
     const creditMap = {
-      'Realistic Group': 'Standard',
-      'Stylized Single': 'Standard',
-      'Pro Realistic Group': 'Higher',
-      'Animated / 3D': 'Standard',
-      'Realistic Single': '4 credits',
-      'Pro Realistic Single': '5 credits',
-      'Stylized Group': '4 credits'
+      'BananaFX Real': 'Standard',
+      'BananaFX Styled': 'Standard',
+      'BananaFX Pro Real': 'Higher',
+      'BananaFX Animated': 'Standard',
+      'PersonaFX Real': '4 credits',
+      'PersonaFX Pro Real': '5 credits',
+      'PersonaFX Styled': '4 credits',
+      'ClassicFX Group Real': 'Standard',
+      'ClassicFX Group Styled': 'Standard'
     };
     const credits = settings.filter ? (creditMap[settings.filter] || 'Standard') : 'Standard';
     checklist += '☐ Assign filter to template → Test render — Credits: <strong>' + credits + '</strong><br>';
@@ -1281,7 +1314,7 @@ function copyREPrompt() {
     setTimeout(() => { btn.textContent = 'Copy Prompt'; btn.classList.remove('copied'); }, 2000);
   });
 }
-</script>
 
+</script>
 </body>
 </html>
