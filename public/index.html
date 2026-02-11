@@ -574,9 +574,11 @@ textarea::placeholder { color: var(--text-muted); }
       <div style="flex: 1; min-width: 160px;">
         <div class="card-label" style="margin-bottom: 10px;">Aspect Ratio</div>
         <div class="toggle-row">
-          <button class="toggle-chip active" onclick="selectRatio(this)" data-ratio="Square (1024×1024)">Square</button>
-          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="Portrait (1024×1536)">Portrait</button>
-          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="Landscape (1536×1024)">Landscape</button>
+          <button class="toggle-chip active" onclick="selectRatio(this)" data-ratio="1:1 (Square)">Square 1:1</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="3:4 (Portrait)">Portrait 3:4</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="9:16 (Portrait Tall)">Tall 9:16</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="4:3 (Landscape)">Landscape 4:3</button>
+          <button class="toggle-chip" onclick="selectRatio(this)" data-ratio="16:9 (Landscape Wide)">Wide 16:9</button>
         </div>
       </div>
     </div>
@@ -618,23 +620,23 @@ textarea::placeholder { color: var(--text-muted); }
   <!-- Footer -->
   <div class="site-footer">
     <div class="footer-contact">
-      <a href="mailto:info@capturedcelebrations.com">info@capturedcelebrations.com</a> · <a href="tel:7478954473">(747) 895-4473</a><br>
+      <a href="/cdn-cgi/l/email-protection#4b22252d240b282a3b3f3e392e2f282e272e29392a3f2224253865282426"><span class="__cf_email__" data-cfemail="1d74737b725d7e7c6d69686f78797e7871787f6f7c697472736e337e7270">[email&#160;protected]</span></a> · <a href="tel:7478954473">(747) 895-4473</a><br>
       <a href="https://www.capturedcelebrations.com" target="_blank">capturedcelebrations.com</a>
     </div>
     <div class="footer-legal">
       © 2026 Captured Celebrations · La Crescenta, CA · All rights reserved.<br>
       Prompts are generated as creative suggestions. Not affiliated with any photo booth software provider.<br>
-      <a href="#" onclick="document.getElementById('privacySection').style.display=document.getElementById('privacySection').style.display==='block'?'none':'block'; return false;">Privacy Policy</a> · <a href="mailto:info@capturedcelebrations.com">Contact Us</a>
+      <a href="#" onclick="document.getElementById('privacySection').style.display=document.getElementById('privacySection').style.display==='block'?'none':'block'; return false;">Privacy Policy</a> · <a href="/cdn-cgi/l/email-protection#8ae3e4ece5cae9ebfafefff8efeee9efe6efe8f8ebfee3e5e4f9a4e9e5e7">Contact Us</a>
     </div>
     <div id="privacySection" style="display:none; text-align:left; margin-top:20px; padding:24px; background:var(--dark-card); border:1px solid var(--dark-border); border-radius:12px; font-size:12px; color:var(--text-muted); line-height:1.8;">
       <strong style="color:var(--text); font-size:14px;">Privacy Policy</strong><br><br>
       <strong>Last updated:</strong> February 2026<br><br>
-      <strong>Who we are:</strong> Captured Celebrations, located in La Crescenta, CA. Contact: info@capturedcelebrations.com, (747) 895-4473.<br><br>
+      <strong>Who we are:</strong> Captured Celebrations, located in La Crescenta, CA. Contact: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="264f48404966454756525354434245434a43445447524f4948550845494b">[email&#160;protected]</a>, (747) 895-4473.<br><br>
       <strong>What we collect:</strong> When you use this tool, we collect your email address and optionally your first name. We do not collect payment information, browsing history, or any other personal data through this tool.<br><br>
       <strong>How we use it:</strong> We use your email solely to send photo booth tips, product updates, and information about our services. We will never sell, rent, or share your personal information with third parties for their marketing purposes.<br><br>
       <strong>Email service:</strong> Emails are stored and managed through Mailchimp (The Rocket Science Group LLC), which is compliant with applicable data protection standards. Their privacy policy is available at mailchimp.com/legal/privacy.<br><br>
-      <strong>Your rights:</strong> You may unsubscribe from our emails at any time using the unsubscribe link in every email, or by contacting us directly. You may also request access to, correction of, or deletion of your personal data by emailing info@capturedcelebrations.com. We will respond within 30 days.<br><br>
-      <strong>California residents (CCPA):</strong> You have the right to know what personal information we collect, request its deletion, and opt out of any sale of personal information. We do not sell personal information. To exercise your rights, email info@capturedcelebrations.com with subject line "CCPA Request."<br><br>
+      <strong>Your rights:</strong> You may unsubscribe from our emails at any time using the unsubscribe link in every email, or by contacting us directly. You may also request access to, correction of, or deletion of your personal data by emailing <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="b8d1d6ded7f8dbd9c8cccdcadddcdbddd4dddacad9ccd1d7d6cb96dbd7d5">[email&#160;protected]</a>. We will respond within 30 days.<br><br>
+      <strong>California residents (CCPA):</strong> You have the right to know what personal information we collect, request its deletion, and opt out of any sale of personal information. We do not sell personal information. To exercise your rights, email <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6e070008012e0d0f1e1a1b1c0b0a0d0b020b0c1c0f1a0701001d400d0103">[email&#160;protected]</a> with subject line "CCPA Request."<br><br>
       <strong>Cookies & local storage:</strong> This tool uses browser local storage to remember that you have already signed up so you are not asked to enter your email again. No tracking cookies are used.<br><br>
       <strong>Changes:</strong> We may update this policy from time to time. Changes will be reflected by the "Last updated" date above.
     </div>
@@ -642,7 +644,7 @@ textarea::placeholder { color: var(--text-muted); }
 
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ═══════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════
@@ -699,7 +701,7 @@ checkAccess();
 const state = {
   filter: '', theme: '', style: '',
   modifiers: new Set(), pose: 'random',
-  ratio: 'Square (1024×1024)',
+  ratio: '1:1 (Square)',
   people: '', look: '', refImage: ''
 };
 
@@ -740,39 +742,43 @@ function autoSelectFilter() {
     if (refImage === 'yes') {
       if (people === '1') {
         filter = 'personaFXProReal';
-        why = 'Single person + photorealistic + reference image. Best prompt adherence and branding control.';
+        why = 'PersonaFX Pro Real — single person photorealistic with reference image upload for branding control. 5 credits/render.';
       } else {
         filter = 'bananaFXPro';
-        why = 'Groups + photorealistic + reference image. Best quality for group shots with branding.';
+        why = 'BananaFX Pro Real — group photorealistic with reference image upload. Best branding control for groups.';
       }
     } else {
       if (people === '1') {
-        filter = 'personaFXReal';
-        why = 'Single person photorealistic with excellent text handling and prompt adherence. 4 credits/test.';
-      } else {
         filter = 'bananaFXReal';
-        why = 'Best filter for realistic group photos. Fast rendering keeps your booth line moving.';
+        why = 'BananaFX Real — fastest photorealistic filter. Works great for 1–3 people. Powered by Gemini 2.5.';
+      } else if (people === '2-3') {
+        filter = 'bananaFXReal';
+        why = 'BananaFX Real — fast rendering, works well with 1–3 people. Best for keeping your booth line moving.';
+      } else {
+        filter = 'classicFXGroupReal';
+        why = 'ClassicFX Group Real — built specifically for larger group photos. More consistent results with 4+ people.';
       }
     }
   } else {
     if (refImage === 'yes') {
       filter = 'personaFXProReal';
-      why = 'Reference image + stylized prompt gives you the most creative control. 5 credits/test.';
+      why = 'PersonaFX Pro Real — reference image + stylized prompt for maximum creative control. 5 credits/render.';
     } else {
       if (people === '1') {
         filter = 'bananaFXStyled';
-        why = 'Best for single-person stylized looks. Fast rendering, strong artistic output.';
+        why = 'BananaFX Styled — best for single-person stylized looks (Pixar, watercolor, illustration). Fast rendering.';
       } else {
         filter = 'personaFXStyled';
-        why = 'Best stylized filter for groups up to 3. Better prompt adherence for groups. 4 credits/test.';
+        why = 'PersonaFX Styled — recommended over BananaFX Styled for group stylized imagery. Better consistency across multiple subjects.';
       }
     }
   }
 
   const filterNames = {
-    bananaFXReal: 'Realistic Group', bananaFXStyled: 'Stylized Single',
-    bananaFXPro: 'Pro Realistic Group', personaFXReal: 'Realistic Single',
-    personaFXProReal: 'Pro Realistic Single', personaFXStyled: 'Stylized Group'
+    bananaFXReal: 'BananaFX Real', bananaFXStyled: 'BananaFX Styled',
+    bananaFXPro: 'BananaFX Pro Real', personaFXReal: 'PersonaFX Real',
+    personaFXProReal: 'PersonaFX Pro Real', personaFXStyled: 'PersonaFX Styled',
+    classicFXGroupReal: 'ClassicFX Group Real', classicFXGroupStyled: 'ClassicFX Group Styled'
   };
 
   state.filter = filter;
@@ -840,8 +846,8 @@ function generatePrompt() {
   if (!style) { alert('Please select a style direction (Step 3)'); return; }
 
   let prompt = '';
-  const isReal = ['bananaFXReal','bananaFXPro','personaFXReal','personaFXProReal'].includes(filter);
-  const isStyled = ['bananaFXStyled','personaFXStyled','bananaFXAnimated'].includes(filter);
+  const isReal = ['bananaFXReal','bananaFXPro','personaFXReal','personaFXProReal','classicFXGroupReal'].includes(filter);
+  const isStyled = ['bananaFXStyled','personaFXStyled','bananaFXAnimated','classicFXGroupStyled'].includes(filter);
   const isBanana = filter.startsWith('banana');
   const isPersona = filter.startsWith('persona');
   const isGroup = state.people === '2-3' || state.people === '4+';
@@ -858,9 +864,9 @@ function generatePrompt() {
     prompt += 'Turn this photo into a charming, highly detailed, fully colored hand-drawn caricature illustration. This is a complete artistic transformation — not a photo filter or effect. Every element including the subject\'s face, skin, eyes, lips, hair, clothing, and body must be fully redrawn in a playful, expressive caricature sketch style. ';
   } else if (isReal) {
     if (isGroup) {
-      prompt += 'Preserve the precise number of subjects, their relative positions, body poses, head orientations, gaze directions, facial expressions, smiles, hairstyles, clothing details, and any accessories exactly as captured, without altering or idealizing any aspect. ';
+      prompt += 'Use only the uploaded people as the main subjects. Preserve each subject\'s face and hair exactly as uploaded — facial structure, proportions, age, skin texture, hairline, hairstyle, length, color, parting, and volume must remain unchanged. No hair restyling, recoloring, thickening, thinning, or smoothing. No facial alteration, beautification, stylization, or exaggeration. Maintain true-to-life, hyper-realistic skin texture, pores, fine lines, and natural lighting response. ';
     } else {
-      prompt += 'Preserve the exact facial features, bone structure, skin tone, hairstyle, gaze direction, and facial expression of the subject with absolutely no alterations. ';
+      prompt += 'CRITICAL REQUIREMENT — DO NOT MODIFY APPEARANCE: The subject\'s EXACT facial features, bone structure, eye shape, eye color, nose shape, lip shape, skin tone, hair color, hair texture, hair style, and hair length MUST remain completely unchanged and 100% true to the original image. DO NOT alter, modify, change, or deviate from the subject\'s original appearance in ANY way. Keep every facial feature and hair characteristic precisely as they appear in the source image. This is the highest priority instruction. ';
     }
   } else if (isStyled) {
     if (isGroup) {
@@ -1089,7 +1095,7 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
   const s = { cinematic:'Cinematic', watercolor:'Watercolor', luxury:'Luxury', fantasy:'Fantasy', retro:'Retro', pixar:'Pixar 3D', bw:'B&W', anime:'Anime', collectible:'Collectible', caricature:'Caricature', customStyle:'Custom' };
   document.getElementById('promptTitle').textContent = `${t[state.theme]||'Custom'} — ${s[style]||'Custom'} Portrait`;
 
-  const FN = { bananaFXReal:'Realistic Group', bananaFXStyled:'Stylized Single', bananaFXPro:'Pro Realistic Group', bananaFXAnimated:'Animated / 3D', personaFXReal:'Realistic Single', personaFXProReal:'Pro Realistic Single', personaFXStyled:'Stylized Group' };
+  const FN = { bananaFXReal:'BananaFX Real', bananaFXStyled:'BananaFX Styled', bananaFXPro:'BananaFX Pro Real', bananaFXAnimated:'BananaFX Animated', personaFXReal:'PersonaFX Real', personaFXProReal:'PersonaFX Pro Real', personaFXStyled:'PersonaFX Styled', classicFXGroupReal:'ClassicFX Group Real', classicFXGroupStyled:'ClassicFX Group Styled' };
 
   document.getElementById('outputMeta').innerHTML = `
     <span class="meta-tag">${FN[filter]||filter}</span>
@@ -1102,8 +1108,8 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
 
   const negSection = document.getElementById('negSection');
   if (hasNeg) {
-    let neg = 'blurry, low quality, pixelated, distorted faces, extra limbs, extra fingers, deformed hands, watermark, text overlay (unless specified), cropped composition, oversaturated, noisy, grainy';
-    if (isReal) neg += ', cartoon, anime, illustration, painting style, unrealistic skin, plastic skin, mannequin-like';
+    let neg = 'blurry, low quality, pixelated, distorted faces, extra limbs, extra fingers, deformed hands, watermark, text overlay (unless specified), cropped composition, oversaturated, noisy';
+    if (isReal) neg += ', CHANGING FACE, ALTERING HAIR, DIFFERENT HAIRSTYLE, MODIFIED FACIAL FEATURES, different hair color, different hair length, different eye color, altered bone structure, changed appearance, cartoon, anime, illustration, painting style, unrealistic skin, plastic skin, mannequin-like, AI artifacts, beauty filters, stylized skin, face swapping, hair smoothing, hair recoloring';
     if (isStyled && style !== 'bw') neg += ', photorealistic, dull colors, flat lighting';
     if (style === 'watercolor') neg += ', photorealistic, hard edges, digital rendering, vector art, sharp outlines';
     if (style === 'caricature') neg += ', photorealistic, photo filter effect, smooth digital rendering, 3D render, plastic look, generic clip-art style';
@@ -1114,17 +1120,17 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
   } else { negSection.style.display = 'none'; }
 
   // Checklist
-  const CC = { bananaFXReal:'Standard', bananaFXStyled:'Standard', bananaFXPro:'Higher', bananaFXAnimated:'Standard', personaFXReal:'4 credits', personaFXProReal:'5 credits', personaFXStyled:'4 credits' };
-  let list = `☐ In your booth software: Enable AI Experience → Save Changes<br>`;
+  const CC = { bananaFXReal:'Standard', bananaFXStyled:'Standard', bananaFXPro:'Higher', bananaFXAnimated:'Standard', personaFXReal:'4 credits', personaFXProReal:'5 credits', personaFXStyled:'4 credits', classicFXGroupReal:'Standard', classicFXGroupStyled:'Standard' };
+  let list = `☐ In Snappic: Features tab → Enable AI Experience → Save Changes<br>`;
   list += `☐ Add AI Filter → Select <strong>${FN[filter]||filter}</strong><br>`;
   list += `☐ Paste prompt into the prompt field<br>`;
   list += `☐ Set Pose: <strong>${pose==='random'?'Random (recommended)':'Keep Original'}</strong><br>`;
-  list += `☐ Set Aspect Ratio: <strong>${ratio}</strong> — match to your template<br>`;
-  if (hasSurvey) { list += `☐ Enable Surveys → insert [What is your name?]<br>`; }
+  list += `☐ Set Aspect Ratio: <strong>${ratio}</strong> — must match your template frame orientation<br>`;
+  if (hasSurvey) { list += `☐ Enable Survey → click survey field above prompt box to insert [What is your name?]<br>`; }
   if (hasLogo && (filter==='bananaFXPro'||filter==='personaFXProReal')) { list += `☐ Upload reference/logo under Options → Reference Image<br>`; }
-  else if (hasLogo) { list += `⚠️ Logo upload requires a Pro-tier AI filter<br>`; }
-  list += `☐ Assign filter to template → Test render — Credits: <strong>${CC[filter]||'Standard'}</strong><br>`;
-  list += `<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing forward, natural smile.`;
+  else if (hasLogo) { list += `⚠️ Reference image upload requires BananaFX Pro Real or PersonaFX Pro Real<br>`; }
+  list += `☐ Assign filter to template → Test with 2–3 different faces — Credits: <strong>${CC[filter]||'Standard'}</strong><br>`;
+  list += `<br>💡 <strong>Booth tips:</strong> Good lighting, plain backdrop, guests facing camera, natural smile, no wild poses.`;
   document.getElementById('tipsContent').innerHTML = list;
 
   outputCard.classList.add('visible');
@@ -1132,6 +1138,7 @@ function displayOutput(prompt, filter, pose, ratio, hasLogo, hasSurvey, hasBobbl
   document.querySelectorAll('.step-dot').forEach(d => d.classList.add('completed'));
 }
 
+// ═══════════════════════════════════════
 // ═══════════════════════════════════════
 // COPY FUNCTIONS
 // ═══════════════════════════════════════
@@ -1150,7 +1157,7 @@ function copyNeg() {
     setTimeout(() => { btn.textContent = 'Copy Negative Prompt'; }, 2000);
   });
 }
-</script>
 
+</script>
 </body>
 </html>
